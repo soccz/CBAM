@@ -76,8 +76,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:
 hr{border:none;height:1px;background:var(--border)}
 
 /* === FADE IN === */
-.fade-in{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
-.fade-in.visible{opacity:1;transform:translateY(0)}
+/* fade-in: 기본은 보임. JS가 로드되면 애니메이션 활성화 */
+.fade-in{opacity:1;transform:translateY(0);transition:opacity .6s ease,transform .6s ease}
+.js-ready .fade-in{opacity:0;transform:translateY(24px)}
+.js-ready .fade-in.visible{opacity:1;transform:translateY(0)}
 
 /* === TYPOGRAPHY === */
 h3{font-size:18px;font-weight:700;margin:32px 0 12px}
@@ -1060,15 +1062,19 @@ function updateActiveNav() {
 window.addEventListener('scroll', updateActiveNav, {passive:true});
 
 // ===== FADE-IN on scroll =====
-const fadeEls = document.querySelectorAll('.fade-in');
-const fadeObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if(entry.isIntersecting) {
-      entry.target.classList.add('visible');
-    }
-  });
-}, {threshold:0.08});
-fadeEls.forEach(el => fadeObserver.observe(el));
+// JS가 정상 작동할 때만 애니메이션 활성화. 실패하면 기본 보임.
+try {
+  document.body.classList.add('js-ready');
+  const fadeEls = document.querySelectorAll('.fade-in');
+  const fadeObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, {threshold:0.08});
+  fadeEls.forEach(el => fadeObserver.observe(el));
+} catch(e) { /* fade-in 실패 시 기본 보임 상태 유지 */ }
 
 // ===== STEP INDICATOR UPDATE =====
 function updateStepIndicators(step) {
