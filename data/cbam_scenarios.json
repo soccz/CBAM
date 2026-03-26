@@ -1,0 +1,370 @@
+{
+  "Net Zero": [
+    {
+      "year": 2026,
+      "phase_in_pct": 2.5,
+      "eu_ets_eur": 80,
+      "k_ets_krw": 12000,
+      "k_ets_eur": 8.3,
+      "spread_eur": 71.7,
+      "cbam_per_ton_eur": 1.79,
+      "total_cost_billion_krw": 0.03
+    },
+    {
+      "year": 2027,
+      "phase_in_pct": 5.0,
+      "eu_ets_eur": 85,
+      "k_ets_krw": 15000,
+      "k_ets_eur": 10.3,
+      "spread_eur": 74.7,
+      "cbam_per_ton_eur": 3.73,
+      "total_cost_billion_krw": 0.05
+    },
+    {
+      "year": 2028,
+      "phase_in_pct": 10.0,
+      "eu_ets_eur": 95,
+      "k_ets_krw": 18000,
+      "k_ets_eur": 12.4,
+      "spread_eur": 82.6,
+      "cbam_per_ton_eur": 8.26,
+      "total_cost_billion_krw": 0.12
+    },
+    {
+      "year": 2029,
+      "phase_in_pct": 22.5,
+      "eu_ets_eur": 100,
+      "k_ets_krw": 22000,
+      "k_ets_eur": 15.2,
+      "spread_eur": 84.8,
+      "cbam_per_ton_eur": 19.09,
+      "total_cost_billion_krw": 0.28
+    },
+    {
+      "year": 2030,
+      "phase_in_pct": 48.5,
+      "eu_ets_eur": 110,
+      "k_ets_krw": 25000,
+      "k_ets_eur": 17.2,
+      "spread_eur": 92.8,
+      "cbam_per_ton_eur": 44.99,
+      "total_cost_billion_krw": 0.65
+    },
+    {
+      "year": 2031,
+      "phase_in_pct": 61.0,
+      "eu_ets_eur": 118,
+      "k_ets_krw": 28000,
+      "k_ets_eur": 19.3,
+      "spread_eur": 98.7,
+      "cbam_per_ton_eur": 60.2,
+      "total_cost_billion_krw": 0.87
+    },
+    {
+      "year": 2032,
+      "phase_in_pct": 73.5,
+      "eu_ets_eur": 125,
+      "k_ets_krw": 32000,
+      "k_ets_eur": 22.1,
+      "spread_eur": 102.9,
+      "cbam_per_ton_eur": 75.65,
+      "total_cost_billion_krw": 1.1
+    },
+    {
+      "year": 2033,
+      "phase_in_pct": 86.0,
+      "eu_ets_eur": 135,
+      "k_ets_krw": 36000,
+      "k_ets_eur": 24.8,
+      "spread_eur": 110.2,
+      "cbam_per_ton_eur": 94.75,
+      "total_cost_billion_krw": 1.37
+    },
+    {
+      "year": 2034,
+      "phase_in_pct": 100.0,
+      "eu_ets_eur": 145,
+      "k_ets_krw": 40000,
+      "k_ets_eur": 27.6,
+      "spread_eur": 117.4,
+      "cbam_per_ton_eur": 117.41,
+      "total_cost_billion_krw": 1.7
+    }
+  ],
+  "Below 2°C": [
+    {
+      "year": 2026,
+      "phase_in_pct": 2.5,
+      "eu_ets_eur": 75,
+      "k_ets_krw": 11000,
+      "k_ets_eur": 7.6,
+      "spread_eur": 67.4,
+      "cbam_per_ton_eur": 1.69,
+      "total_cost_billion_krw": 0.02
+    },
+    {
+      "year": 2027,
+      "phase_in_pct": 5.0,
+      "eu_ets_eur": 78,
+      "k_ets_krw": 13000,
+      "k_ets_eur": 9.0,
+      "spread_eur": 69.0,
+      "cbam_per_ton_eur": 3.45,
+      "total_cost_billion_krw": 0.05
+    },
+    {
+      "year": 2028,
+      "phase_in_pct": 10.0,
+      "eu_ets_eur": 82,
+      "k_ets_krw": 16000,
+      "k_ets_eur": 11.0,
+      "spread_eur": 71.0,
+      "cbam_per_ton_eur": 7.1,
+      "total_cost_billion_krw": 0.1
+    },
+    {
+      "year": 2029,
+      "phase_in_pct": 22.5,
+      "eu_ets_eur": 86,
+      "k_ets_krw": 18000,
+      "k_ets_eur": 12.4,
+      "spread_eur": 73.6,
+      "cbam_per_ton_eur": 16.56,
+      "total_cost_billion_krw": 0.24
+    },
+    {
+      "year": 2030,
+      "phase_in_pct": 48.5,
+      "eu_ets_eur": 90,
+      "k_ets_krw": 20000,
+      "k_ets_eur": 13.8,
+      "spread_eur": 76.2,
+      "cbam_per_ton_eur": 36.96,
+      "total_cost_billion_krw": 0.54
+    },
+    {
+      "year": 2031,
+      "phase_in_pct": 61.0,
+      "eu_ets_eur": 95,
+      "k_ets_krw": 22000,
+      "k_ets_eur": 15.2,
+      "spread_eur": 79.8,
+      "cbam_per_ton_eur": 48.69,
+      "total_cost_billion_krw": 0.71
+    },
+    {
+      "year": 2032,
+      "phase_in_pct": 73.5,
+      "eu_ets_eur": 100,
+      "k_ets_krw": 24000,
+      "k_ets_eur": 16.6,
+      "spread_eur": 83.4,
+      "cbam_per_ton_eur": 61.33,
+      "total_cost_billion_krw": 0.89
+    },
+    {
+      "year": 2033,
+      "phase_in_pct": 86.0,
+      "eu_ets_eur": 105,
+      "k_ets_krw": 26000,
+      "k_ets_eur": 17.9,
+      "spread_eur": 87.1,
+      "cbam_per_ton_eur": 74.88,
+      "total_cost_billion_krw": 1.09
+    },
+    {
+      "year": 2034,
+      "phase_in_pct": 100.0,
+      "eu_ets_eur": 110,
+      "k_ets_krw": 28000,
+      "k_ets_eur": 19.3,
+      "spread_eur": 90.7,
+      "cbam_per_ton_eur": 90.69,
+      "total_cost_billion_krw": 1.31
+    }
+  ],
+  "Delayed": [
+    {
+      "year": 2026,
+      "phase_in_pct": 2.5,
+      "eu_ets_eur": 70,
+      "k_ets_krw": 10000,
+      "k_ets_eur": 6.9,
+      "spread_eur": 63.1,
+      "cbam_per_ton_eur": 1.58,
+      "total_cost_billion_krw": 0.02
+    },
+    {
+      "year": 2027,
+      "phase_in_pct": 5.0,
+      "eu_ets_eur": 68,
+      "k_ets_krw": 10500,
+      "k_ets_eur": 7.2,
+      "spread_eur": 60.8,
+      "cbam_per_ton_eur": 3.04,
+      "total_cost_billion_krw": 0.04
+    },
+    {
+      "year": 2028,
+      "phase_in_pct": 10.0,
+      "eu_ets_eur": 65,
+      "k_ets_krw": 11000,
+      "k_ets_eur": 7.6,
+      "spread_eur": 57.4,
+      "cbam_per_ton_eur": 5.74,
+      "total_cost_billion_krw": 0.08
+    },
+    {
+      "year": 2029,
+      "phase_in_pct": 22.5,
+      "eu_ets_eur": 70,
+      "k_ets_krw": 12000,
+      "k_ets_eur": 8.3,
+      "spread_eur": 61.7,
+      "cbam_per_ton_eur": 13.89,
+      "total_cost_billion_krw": 0.2
+    },
+    {
+      "year": 2030,
+      "phase_in_pct": 48.5,
+      "eu_ets_eur": 78,
+      "k_ets_krw": 14000,
+      "k_ets_eur": 9.7,
+      "spread_eur": 68.3,
+      "cbam_per_ton_eur": 33.15,
+      "total_cost_billion_krw": 0.48
+    },
+    {
+      "year": 2031,
+      "phase_in_pct": 61.0,
+      "eu_ets_eur": 85,
+      "k_ets_krw": 16000,
+      "k_ets_eur": 11.0,
+      "spread_eur": 74.0,
+      "cbam_per_ton_eur": 45.12,
+      "total_cost_billion_krw": 0.65
+    },
+    {
+      "year": 2032,
+      "phase_in_pct": 73.5,
+      "eu_ets_eur": 92,
+      "k_ets_krw": 18000,
+      "k_ets_eur": 12.4,
+      "spread_eur": 79.6,
+      "cbam_per_ton_eur": 58.5,
+      "total_cost_billion_krw": 0.85
+    },
+    {
+      "year": 2033,
+      "phase_in_pct": 86.0,
+      "eu_ets_eur": 100,
+      "k_ets_krw": 20000,
+      "k_ets_eur": 13.8,
+      "spread_eur": 86.2,
+      "cbam_per_ton_eur": 74.14,
+      "total_cost_billion_krw": 1.07
+    },
+    {
+      "year": 2034,
+      "phase_in_pct": 100.0,
+      "eu_ets_eur": 110,
+      "k_ets_krw": 22000,
+      "k_ets_eur": 15.2,
+      "spread_eur": 94.8,
+      "cbam_per_ton_eur": 94.83,
+      "total_cost_billion_krw": 1.38
+    }
+  ],
+  "Current": [
+    {
+      "year": 2026,
+      "phase_in_pct": 2.5,
+      "eu_ets_eur": 65,
+      "k_ets_krw": 9500,
+      "k_ets_eur": 6.6,
+      "spread_eur": 58.4,
+      "cbam_per_ton_eur": 1.46,
+      "total_cost_billion_krw": 0.02
+    },
+    {
+      "year": 2027,
+      "phase_in_pct": 5.0,
+      "eu_ets_eur": 63,
+      "k_ets_krw": 9800,
+      "k_ets_eur": 6.8,
+      "spread_eur": 56.2,
+      "cbam_per_ton_eur": 2.81,
+      "total_cost_billion_krw": 0.04
+    },
+    {
+      "year": 2028,
+      "phase_in_pct": 10.0,
+      "eu_ets_eur": 60,
+      "k_ets_krw": 10000,
+      "k_ets_eur": 6.9,
+      "spread_eur": 53.1,
+      "cbam_per_ton_eur": 5.31,
+      "total_cost_billion_krw": 0.08
+    },
+    {
+      "year": 2029,
+      "phase_in_pct": 22.5,
+      "eu_ets_eur": 58,
+      "k_ets_krw": 10200,
+      "k_ets_eur": 7.0,
+      "spread_eur": 51.0,
+      "cbam_per_ton_eur": 11.47,
+      "total_cost_billion_krw": 0.17
+    },
+    {
+      "year": 2030,
+      "phase_in_pct": 48.5,
+      "eu_ets_eur": 55,
+      "k_ets_krw": 10500,
+      "k_ets_eur": 7.2,
+      "spread_eur": 47.8,
+      "cbam_per_ton_eur": 23.16,
+      "total_cost_billion_krw": 0.34
+    },
+    {
+      "year": 2031,
+      "phase_in_pct": 61.0,
+      "eu_ets_eur": 55,
+      "k_ets_krw": 10800,
+      "k_ets_eur": 7.4,
+      "spread_eur": 47.6,
+      "cbam_per_ton_eur": 29.01,
+      "total_cost_billion_krw": 0.42
+    },
+    {
+      "year": 2032,
+      "phase_in_pct": 73.5,
+      "eu_ets_eur": 56,
+      "k_ets_krw": 11000,
+      "k_ets_eur": 7.6,
+      "spread_eur": 48.4,
+      "cbam_per_ton_eur": 35.58,
+      "total_cost_billion_krw": 0.52
+    },
+    {
+      "year": 2033,
+      "phase_in_pct": 86.0,
+      "eu_ets_eur": 58,
+      "k_ets_krw": 11200,
+      "k_ets_eur": 7.7,
+      "spread_eur": 50.3,
+      "cbam_per_ton_eur": 43.24,
+      "total_cost_billion_krw": 0.63
+    },
+    {
+      "year": 2034,
+      "phase_in_pct": 100.0,
+      "eu_ets_eur": 60,
+      "k_ets_krw": 11500,
+      "k_ets_eur": 7.9,
+      "spread_eur": 52.1,
+      "cbam_per_ton_eur": 52.07,
+      "total_cost_billion_krw": 0.76
+    }
+  ]
+}

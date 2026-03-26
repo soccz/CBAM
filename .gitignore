@@ -1,0 +1,12 @@
+.DS_Store
+__pycache__/
+*.pyc
+*.hwp
+*.env
+*.pem
+*.key
+lgbm_*.txt
+data_merged.csv
+synthetic_kets.csv
+node_modules/
+.claude/

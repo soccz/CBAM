@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#008C73">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CarbonCast">
+<title>CarbonCast — CBAM 데이터 검증 + 비용 시뮬레이션</title>
+<!-- manifest는 HTTPS 배포 시에만 활성화 -->
+<!-- <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiQ2FyYm9uQ2FzdCIsInNob3J0X25hbWUiOiJDYXJib25DYXN0Iiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiNGRkZGRkYiLCJ0aGVtZV9jb2xvciI6IiMwMDhDNzMiLCJpY29ucyI6W119"> -->
+<!-- Google Fonts: 온라인이면 로드, 오프라인이면 시스템 폰트 fallback -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700;800&display=swap" rel="stylesheet" onerror="this.remove()">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --hana:#008C73;--hana-dark:#006B57;--hana-deep:#004D3D;--hana-light:#E6F5F1;--hana-pale:#F2FAF8;
+  --red:#C62828;--red-bg:#FFF5F5;--red-border:#FFCDD2;
+  --orange:#E65100;--orange-bg:#FFF8E1;--orange-border:#FFE0B2;
+  --blue:#1565C0;--blue-bg:#E3F2FD;--blue-border:#BBDEFB;
+  --green-bg:#E8F5E9;--green-border:#C8E6C9;
+  --bg:#FFFFFF;--bg2:#F7F8FA;--text:#1B1B1B;--sub:#5A6370;--light:#8C95A0;--border:#DDE1E6;
+  --sans:'Noto Sans KR','Apple SD Gothic Neo',sans-serif;--mono:'JetBrains Mono','SF Mono',monospace;
+  --r:12px;--shadow:0 1px 8px rgba(0,0,0,.06);
+  --nav-h:56px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.75;-webkit-font-smoothing:antialiased;padding-top:var(--nav-h)}
+
+/* === NAV === */
+.nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:rgba(255,255,255,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border);z-index:1000;display:flex;align-items:center}
+.nav-inner{max-width:960px;margin:0 auto;padding:0 20px;width:100%;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-size:16px;font-weight:800;color:var(--hana);white-space:nowrap}
+.nav-links{display:flex;gap:4px}
+.nav-links a{font-size:12px;color:var(--sub);text-decoration:none;padding:8px 12px;border-radius:8px;transition:all .2s;white-space:nowrap}
+.nav-links a:hover,.nav-links a.active{background:var(--hana-light);color:var(--hana)}
+.hamburger{display:none;width:44px;height:44px;border:none;background:none;cursor:pointer;flex-shrink:0;position:relative}
+.hamburger span,.hamburger span::before,.hamburger span::after{display:block;width:20px;height:2px;background:var(--text);border-radius:2px;transition:all .3s}
+.hamburger span{position:absolute;left:12px;top:50%;transform:translateY(-50%)}
+.hamburger span::before{content:'';position:absolute;top:-6px}
+.hamburger span::after{content:'';position:absolute;top:6px}
+.hamburger.open span{background:transparent}
+.hamburger.open span::before{top:0;transform:rotate(45deg)}
+.hamburger.open span::after{top:0;transform:rotate(-45deg)}
+
+@media(max-width:768px){
+  .nav-links{display:none;position:absolute;top:var(--nav-h);left:0;right:0;background:#fff;border-bottom:1px solid var(--border);flex-direction:column;padding:8px 16px;box-shadow:0 4px 12px rgba(0,0,0,.08)}
+  .nav-links.show{display:flex}
+  .nav-links a{padding:12px 16px;font-size:14px}
+  .hamburger{display:block}
+}
+
+/* === LAYOUT === */
+.w{max-width:880px;margin:0 auto;padding:0 20px}
+@media(min-width:769px){.w{padding:0 28px}}
+
+/* === COVER === */
+.cover{background:linear-gradient(135deg,var(--hana-deep) 0%,var(--hana) 55%,#00A67E 100%);color:#fff;padding:80px 0 60px;position:relative;overflow:hidden}
+.cover::after{content:'';position:absolute;right:-80px;top:-80px;width:400px;height:400px;border-radius:50%;background:rgba(255,255,255,.04)}
+.cover .w{position:relative;z-index:1}
+.cover .chip{display:inline-block;font-size:11px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);padding:4px 14px;border-radius:20px;margin-bottom:20px}
+.cover h1{font-size:34px;font-weight:800;line-height:1.3;margin-bottom:10px}
+.cover h1 em{font-style:normal;color:#A8E6CF}
+.cover .desc{font-size:15px;opacity:.85;max-width:620px;margin-bottom:32px}
+.cover .meta{font-size:11px;opacity:.5}
+
+/* === SECTIONS === */
+.sec{padding:56px 0}
+.sec-alt{background:var(--bg2)}
+.sec-num{font-size:11px;font-weight:700;color:var(--hana);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
+.sec-title{font-size:24px;font-weight:800;letter-spacing:-.3px;margin-bottom:6px}
+.sec-sub{font-size:14px;color:var(--sub);margin-bottom:28px}
+hr{border:none;height:1px;background:var(--border)}
+
+/* === FADE IN === */
+/* fade-in: 기본은 보임. JS가 로드되면 애니메이션 활성화 */
+.fade-in{opacity:1;transform:translateY(0);transition:opacity .6s ease,transform .6s ease}
+.js-ready .fade-in{opacity:0;transform:translateY(24px)}
+.js-ready .fade-in.visible{opacity:1;transform:translateY(0)}
+
+/* === TYPOGRAPHY === */
+h3{font-size:18px;font-weight:700;margin:32px 0 12px}
+h4{font-size:15px;font-weight:700;margin:20px 0 8px}
+p{margin-bottom:12px;font-size:14px;color:var(--sub)}
+p.body{color:var(--text)}
+strong{color:var(--text)}
+
+/* === TABLE === */
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:16px 0 24px}
+table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
+thead th{background:var(--bg2);padding:10px 12px;text-align:left;font-size:11px;font-weight:600;color:var(--sub);border-bottom:2px solid var(--border);white-space:nowrap}
+tbody td{padding:10px 12px;border-bottom:1px solid #F0F2F5}
+tbody tr:hover{background:var(--hana-pale)}
+.mono{font-family:var(--mono);font-size:12px}
+.hl{color:var(--hana);font-weight:600}
+.red{color:var(--red);font-weight:600}
+td.r{text-align:right}
+
+/* === CARDS (CSS class grid, no inline) === */
+.cards{display:grid;gap:14px;margin:16px 0 24px}
+.cards-2{grid-template-columns:repeat(2,1fr)}
+.cards-3{grid-template-columns:repeat(3,1fr)}
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:20px}
+.card h4{margin:0 0 4px}
+.card p{font-size:12px;margin:0}
+.card .big{font-family:var(--mono);font-size:28px;font-weight:800;margin-bottom:4px}
+.card .big.green{color:var(--hana)}
+.card .big.red{color:var(--red)}
+.card .big.orange{color:var(--orange)}
+.card .big.blue{color:var(--blue)}
+.card-border-red{border-left:3px solid var(--red)}
+.card-border-blue{border-left:3px solid var(--blue)}
+.card-border-orange{border-left:3px solid var(--orange)}
+.card-border-hana{border-left:3px solid var(--hana)}
+
+.src{font-size:10px;color:var(--light);margin-top:4px;font-style:italic}
+
+/* === CALLOUT === */
+.co{padding:16px 18px;border-radius:10px;font-size:13px;line-height:1.8;margin:16px 0}
+.co b{font-weight:700}
+.co.info{background:var(--blue-bg);border:1px solid var(--blue-border);color:#0D47A1}
+.co.warn{background:var(--orange-bg);border:1px solid var(--orange-border);color:var(--orange)}
+.co.danger{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red)}
+.co.ok{background:var(--hana-light);border:1px solid var(--green-border);color:var(--hana-dark)}
+
+/* === BEFORE/AFTER === */
+.ba{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0 24px}
+.ba-col{border-radius:var(--r);padding:20px;border:1px solid var(--border)}
+.ba-col.before{background:var(--bg2)}
+.ba-col.after{background:var(--hana-light);border-color:var(--hana)}
+.ba-col h4{margin:0 0 12px;font-size:13px;font-weight:700}
+.ba-col ul{list-style:none;padding:0}
+.ba-col li{font-size:12px;color:var(--sub);line-height:2;padding-left:16px;position:relative}
+.ba-col li::before{content:'';position:absolute;left:0;top:10px;width:6px;height:6px;border-radius:50%}
+.ba-col.before li::before{background:var(--border)}
+.ba-col.after li::before{background:var(--hana)}
+
+/* === FLOW === */
+.flow{display:flex;align-items:stretch;gap:0;margin:20px 0}
+.flow-step{flex:1;background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:16px 12px;text-align:center}
+.flow-step.active{border-color:var(--hana);background:var(--hana-light);border-width:2px}
+.flow-step h5{font-size:11px;font-weight:700;margin-bottom:4px}
+.flow-step p{font-size:10px;color:var(--sub);margin:0}
+.flow-arrow{display:flex;align-items:center;padding:0 4px;font-size:16px;color:var(--hana)}
+
+/* === PIPE === */
+.pipe{display:flex;align-items:stretch;gap:0;margin:24px 0}
+.pipe-step{flex:1;padding:20px 16px;text-align:center;position:relative}
+.pipe-step .icon{font-size:28px;margin-bottom:8px}
+.pipe-step h5{font-size:13px;font-weight:700;margin-bottom:4px}
+.pipe-step p{font-size:11px;color:var(--sub);margin:0}
+.pipe-step.s1{background:var(--blue-bg);border-radius:var(--r) 0 0 var(--r)}
+.pipe-step.s2{background:var(--hana-light)}
+.pipe-step.s3{background:var(--orange-bg);border-radius:0 var(--r) var(--r) 0}
+.pipe-arrow{display:flex;align-items:center;font-size:20px;color:var(--hana);padding:0 2px}
+
+/* === QUOTE === */
+.quote{background:linear-gradient(135deg,var(--hana-deep),var(--hana));color:#fff;border-radius:14px;padding:36px;text-align:center;margin:32px 0}
+.quote p{font-size:18px;font-weight:700;line-height:1.6;margin:0;color:#fff}
+.quote .small{font-size:12px;opacity:.6;margin-top:10px}
+
+/* === FOOTER === */
+.footer{text-align:center;padding:40px 0;border-top:1px solid var(--border);background:var(--bg2)}
+.footer p{font-size:11px;color:var(--light);line-height:1.8}
+
+/* === SCORE BAR === */
+.score-bar{height:8px;border-radius:4px;background:var(--border);margin:8px 0;overflow:hidden}
+.score-bar .fill{height:100%;border-radius:4px;transition:width .3s}
+.fill-green{background:var(--hana)}
+.fill-orange{background:var(--orange)}
+.fill-red{background:var(--red)}
+
+/* === DEMO AREA === */
+.demo-box{background:var(--bg2);border:2px solid var(--hana);border-radius:var(--r);padding:24px;margin:24px 0}
+.demo-box h4{color:var(--hana);margin-top:0}
+.demo-grid{display:grid;gap:16px;margin:16px 0}
+.demo-grid-2{grid-template-columns:1fr 1fr}
+.demo-grid-3{grid-template-columns:1fr 1fr 1fr}
+
+/* === STEP INDICATOR === */
+.step-indicator{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.step-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;background:var(--border)}
+.step-dot.active{background:var(--hana)}
+.step-dot.done{background:var(--hana-dark)}
+.step-line{flex:1;height:2px;background:var(--border)}
+.step-line.done{background:var(--hana)}
+.step-label{font-size:11px;color:var(--sub)}
+
+/* === FORM ELEMENTS (mobile friendly) === */
+.form-label{font-size:12px;font-weight:600;display:block;margin-bottom:4px}
+.form-select,.form-input{width:100%;padding:12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:var(--sans);min-height:44px;-webkit-appearance:none;appearance:none;background:#fff}
+.form-select{background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235A6370' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") no-repeat right 12px center}
+.form-input-mono{font-family:var(--mono)}
+.form-btn{min-height:44px;padding:12px 28px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.form-btn-primary{background:var(--hana);color:#fff}
+.form-btn-danger{background:var(--red);color:#fff}
+.form-range{width:100%;accent-color:var(--hana);min-height:44px}
+
+/* === DETAILS (tech section) === */
+details summary{cursor:pointer;font-size:16px;font-weight:700;margin:20px 0 12px;color:var(--hana);min-height:44px;display:flex;align-items:center}
+
+/* === FORMULA === */
+.formula-box{background:var(--bg2);padding:14px 18px;border-radius:10px;font-family:var(--mono);font-size:13px;margin:12px 0;line-height:2.2}
+
+/* === RESPONSIVE === */
+@media(max-width:768px){
+  .cards-2,.cards-3{grid-template-columns:1fr}
+  .demo-grid-2,.demo-grid-3{grid-template-columns:1fr}
+  .ba{grid-template-columns:1fr}
+  .flow,.pipe{flex-direction:column}
+  .flow-arrow,.pipe-arrow{transform:rotate(90deg);padding:4px 0;justify-content:center}
+  .cover h1{font-size:26px}
+  .cover{padding:60px 0 40px}
+  .sec{padding:40px 0}
+  .pipe-step.s1{border-radius:var(--r) var(--r) 0 0}
+  .pipe-step.s3{border-radius:0 0 var(--r) var(--r)}
+  .cmp-grid{grid-template-columns:1fr !important}
+}
+</style>
+</head>
+<body>
+
+<!-- ==================== NAV ==================== -->
+<nav class="nav">
+<div class="nav-inner">
+  <div class="nav-logo">CarbonCast</div>
+  <button class="hamburger" id="hamburger" aria-label="메뉴 열기"><span></span></button>
+  <div class="nav-links" id="nav-links">
+    <a href="#sec01">01 문제</a>
+    <a href="#sec02">02 해결</a>
+    <a href="#sec03">03 위치</a>
+    <a href="#sec04">04 왜하나</a>
+    <a href="#sec05">05 시나리오</a>
+    <a href="#sec06">06 기술</a>
+    <a href="#sec07">07 현황</a>
+    <a href="#sec08">08 출처</a>
+  </div>
+</div>
+</nav>
+
+<!-- ==================== COVER ==================== -->
+<div class="cover">
+<div class="w">
+<span class="chip">하나 청년 금융인재 양성 프로젝트 · CBAM 파트</span>
+<h1>CarbonCast<br><em>배출 데이터 검증</em>에서 <em>비용 산출</em>까지</h1>
+<p class="desc">기업이 제출한 배출 데이터를 AI로 사전 점검(품질 스코어링)하고, 검증 이력을 블록체인에 기록한 뒤, CBAM 비용을 시뮬레이션합니다.<br>ESG TradeGuard 플랫폼의 CBAM 비용 분석 모듈.</p>
+<p class="meta">2026.03 · AI 품질 스코어링 + 블록체인 인증 + CBAM 시뮬레이션</p>
+</div>
+</div>
+
+<!-- ==================== 01. 문제 ==================== -->
+<div class="sec fade-in" id="sec01">
+<div class="w">
+<div class="sec-num">01 — 문제</div>
+<div class="sec-title">CBAM, 왜 문제인가</div>
+<div class="sec-sub">EU가 CBAM을 본격 시행했습니다. 대형 수출기업 일부를 제외하면, 다수의 한국 수출기업은 세부 요구사항에 충분히 대비하지 못한 상태입니다.</div>
+
+<h3>CBAM이란?</h3>
+<p class="body">EU는 2023년 10월 1일부터 2025년 12월 31일까지 보고 의무만 있는 과도기(Transitional Phase)를 거치고, <strong>2026년 1월부터는 CBAM 인증서 구매·반납 의무가 생기는 본격 시행 단계</strong>에 들어갔습니다.</p>
+<p class="body">EU 공장은 EU ETS로 상당한 탄소비용을 부담하고, 한국도 2015년부터 K-ETS를 운영하지만 <strong>탄소가격 수준과 제도 설계가 다릅니다.</strong> CBAM은 이 <strong>탄소가격 격차</strong>를 수입품에 부과되는 인증서(탄소 관세에 준하는 가격 조정 메커니즘)로 조정합니다. 원산지에서 이미 낸 탄소비용(K-ETS 유상매입분 등)은 그만큼 공제됩니다.</p>
+
+<div class="co info"><b>핵심 구조:</b> CBAM 인증서를 구매하고 신고하는 의무는 <b>EU 수입자(Authorized CBAM Declarant)</b>에게 있습니다. 한국 수출기업이 직접 EU에 신고하는 것이 아닙니다.<br><br>
+그러나 EU 수입자가 한국 공급자에게 <b>"배출 데이터를 보내라"</b>고 요구합니다. 데이터를 못 주면 EU 수입자는 기본값(높은 비용)을 적용받고, 그 비용을 한국 기업에 <b>가격 협상으로 전가</b>합니다. 결국 한국 기업이 손해.</div>
+
+<div class="co warn"><b>기본값 패널티:</b> 한국 기업이 배출 데이터를 제공하지 못하면, EU는 제품별 <b>"기본값"</b>을 적용합니다. 이 기본값은 해당 제품의 높은 수준 배출량 + 마크업(10~30%)이라 실제보다 높습니다. <b>정확한 CBAM 공식 기본값은 제품·공정·원산지별로 상이합니다.</b><br><span class="src">IR 2025/2621 (기본값 체계), co2-iq.com (마크업 구조)</span></div>
+
+<h3>숫자로 보면</h3>
+<div class="cards cards-3">
+<div class="card card-border-red">
+<div class="big red">3.90</div>
+<h4>EU 기본값 예시 (철강 반제품, CN 7207)</h4>
+<p>(내부 시뮬레이션용) tCO₂/톤. 기저값 3.00 + 30% 마크업(2028~) 적용 시. 특정 CN코드·마크업 조합의 예시값.</p>
+<p class="src">기저값 3.00은 SteelRadar, IR 2025/2621 등을 참고한 내부 기준치. 실제 CBAM 공식 기본값은 제품·공정·원산지별로 상이.</p>
+</div>
+<div class="card card-border-blue">
+<div class="big blue">~2.05</div>
+<h4>한국 실제 (포스코 고로)</h4>
+<p>tCO₂/톤. 포스코 온실가스 집약도.</p>
+<p class="src">포스코 탈탄소 로드맵 (sustainability.posco.co.kr)</p>
+</div>
+<div class="card card-border-orange">
+<div class="big orange">~20억</div>
+<h4>1만톤 수출 시 연간 과다 부담</h4>
+<p>기본값(3.90) vs 실측(2.05) 차이 × EU ETS 가격 기반. 2034년(폐지율 100%) 기준.</p>
+<p class="src">(3.90−2.05)×€75×1만톤×₩1,450 ≈ 20.1억</p>
+</div>
+</div>
+
+<h3>그런데 한국 기업의 현실은</h3>
+<div class="cards cards-3">
+<div class="card"><div class="big red">78.3%</div><h4>CBAM 자체를 모름</h4><p>중소 수출기업 대상 조사.</p><p class="src">중소기업중앙회 (2023) CBAM 인식 조사</p></div>
+<div class="card"><div class="big orange">54.9%</div><h4>대응계획 없음</h4><p>알아도 뭘 해야 하는지 모름.</p><p class="src">중소기업중앙회 (2023) 설문조사</p></div>
+<div class="card"><div class="big blue">약 800여 개</div><h4>K-ETS 대상 (대형 중심)</h4><p>다수의 중소 수출기업(특히 간접 수출·부자재 공급)은 공정별 배출량 측정 인프라가 충분히 구축되지 않은 상태.</p></div>
+</div>
+
+<div class="co danger"><b>두 가지 문제가 동시에 존재합니다:</b><br><br>
+<b>① 데이터가 있는 기업 (대기업/K-ETS 대상):</b> 배출량은 알지만, EU 바이어에게 보내는 데이터의 <b>품질과 신뢰성</b>을 어떻게 보증할지 모름. EU accredited verifier 검증 전 단계에서 오류를 잡을 도구가 없음.<br><br>
+<b>② 데이터가 없는 기업 (중소기업):</b> 배출량 자체를 모르니 기본값을 맞음. 기본값은 실제보다 높아서 <b>돈을 더 냄.</b> "실측 데이터를 확보하면 얼마를 아끼는지"조차 모르니 대응 동기가 없음.<br><br>
+<b>→ CarbonCast는 이 두 문제를 각각 다르게 해결합니다.</b></div>
+
+<h3>그리고 은행 입장에서는</h3>
+<p class="body">하나은행이 수출기업에 PF 대출(10~20년)을 해줄 때, <strong>CBAM 비용을 반영하지 않으면 심사가 부실</strong>해집니다. 2026년엔 적용률 2.5%라 미미하지만, 2030년 48.5%, 2034년 100%로 급증합니다.</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>연도</th><th>2026</th><th>2027</th><th>2028</th><th>2029</th><th>2030</th><th>2031</th><th>2032</th><th>2033</th><th>2034</th></tr></thead>
+<tbody><tr>
+<td style="font-weight:600">EU ETS 무상할당 폐지율</td>
+<td class="mono">2.5%</td><td class="mono">5%</td><td class="mono">10%</td><td class="mono">22.5%</td>
+<td class="mono hl">48.5%</td><td class="mono">61%</td><td class="mono">73.5%</td><td class="mono">86%</td><td class="mono red">100%</td>
+</tr></tbody>
+</table>
+</div>
+<p class="src">EU Regulation 2023/956 — EU ETS 무상할당 단계적 폐지 스케줄. CBAM 인증서 구매 의무는 이 폐지분만큼 발생.</p>
+
+<div class="co info"><b>CBAM 전환기는 2023년 10월에 이미 시작되었고</b>, 2026년 1월부터 본격 시행(인증서 구매 의무)이 시작됩니다. 즉, "곧 온다"가 아니라 <b>"이미 시작됐다"</b>입니다.</div>
+</div>
+</div>
+
+<hr>
+
+<!-- ==================== 02. 해결 ==================== -->
+<div class="sec sec-alt fade-in" id="sec02">
+<div class="w">
+<div class="sec-num">02 — 해결</div>
+<div class="sec-title">CarbonCast — 두 가지 문제, 두 가지 트랙</div>
+<div class="sec-sub">데이터가 있는 기업에게는 검증을, 없는 기업에게는 대응 동기를 제공합니다.</div>
+
+<div class="cards cards-2" style="margin-bottom:24px">
+<div class="card card-border-hana">
+<h4>Track A — 데이터 보유 기업</h4>
+<p style="margin:8px 0"><strong>AI 품질 스코어링:</strong> 제출할 배출 데이터가 업종 범위 안에 있는지, 에너지-배출 정합성이 맞는지 사전 검증. EU accredited verifier 검증 전 오류 스크리닝.</p>
+<p style="margin:4px 0"><strong>블록체인 기록:</strong> 검증 통과한 데이터의 해시를 블록체인에 기록. 제출 이력의 감사 추적(audit trail)용.</p>
+</div>
+<div class="card card-border-orange">
+<h4>Track B — 데이터 미보유 기업</h4>
+<p style="margin:8px 0"><strong>기본값 vs 실측 시뮬레이션:</strong> "기본값이 적용되면 얼마를 더 내는지, 실측 데이터를 확보하면 얼마를 아끼는지" 즉시 계산. 데이터 확보 동기를 만듭니다.</p>
+</div>
+</div>
+
+<div class="pipe">
+<div class="pipe-step s1">
+<div class="icon">🔍</div>
+<h5>1. AI 품질 스코어링</h5>
+<p>배출 데이터의<br>신뢰성 사전 검증</p>
+</div>
+<div class="pipe-arrow">→</div>
+<div class="pipe-step s2">
+<div class="icon">⛓️</div>
+<h5>2. 블록체인 기록</h5>
+<p>검증 이력<br>변조 불가 보관</p>
+</div>
+<div class="pipe-arrow">→</div>
+<div class="pipe-step s3">
+<div class="icon">📊</div>
+<h5>3. CBAM 비용 시뮬레이션</h5>
+<p>기본값 vs 실측 비교<br>연도별 비용 경로</p>
+</div>
+</div>
+
+<div class="co info"><b>역할 구분:</b> AI 품질 스코어링은 EU 공식 검증(accredited verifier)을 <b>대체하지 않습니다.</b> EU가 인정하는 검증은 ISO 14065 인증기관만 수행할 수 있습니다. CarbonCast는 그 <b>전 단계에서 오류를 잡아주는 사전 필터</b>이자, 기업이 데이터 확보의 경제적 가치를 판단하는 <b>의사결정 지원 도구</b>입니다.</div>
+
+<!-- 모듈 1 상세 -->
+<h3>모듈 1. 배출 데이터 품질 스코어링 — "이 숫자, 믿어도 되나?"</h3>
+
+<p class="body">기업이 배출 데이터를 제출하면, AI가 <strong>"이 숫자가 해당 업종에서 합리적인 범위인지"</strong> 0~100점으로 즉시 판단합니다.</p>
+
+<div class="cards cards-2">
+<div class="card card-border-hana">
+<h4>예시: 신뢰할 수 있는 데이터</h4>
+<p style="margin:8px 0"><strong>A기업</strong> — 철강(고로), 배출계수 1.95 tCO₂/t</p>
+<div class="score-bar"><div class="fill fill-green" style="width:87%"></div></div>
+<p><strong class="hl">품질 스코어: 87 / 100</strong></p>
+<p>한국 고로 철강 분포(1.8~2.1)의 중앙 부근. 신뢰 가능.</p>
+</div>
+<div class="card card-border-red">
+<h4>예시: 의심스러운 데이터</h4>
+<p style="margin:8px 0"><strong>B기업</strong> — 철강(고로), 배출계수 0.8 tCO₂/t</p>
+<div class="score-bar"><div class="fill fill-red" style="width:12%"></div></div>
+<p><strong class="red">품질 스코어: 12 / 100</strong></p>
+<p>고로에서 0.8은 물리적으로 불가능. 전기로(EAF) 기준으로도 비현실적. <strong>데이터 재확인 필요.</strong></p>
+</div>
+</div>
+
+<h4>어떻게 판단하나?</h4>
+<div class="table-wrap">
+<table>
+<thead><tr><th>판단 기준</th><th>데이터 소스</th><th>방법</th></tr></thead>
+<tbody>
+<tr><td style="font-weight:600">업종별 배출계수 분포</td><td>K-ETS 명세서 (약 800여 개 사업장)</td><td>KDE(커널 밀도 추정)로 업종별 정상 범위 산출</td></tr>
+<tr><td style="font-weight:600">생산공정 일관성</td><td>기업 제출 정보 (고로/전기로 등)</td><td>공정별 물리적 하한·상한 체크</td></tr>
+<tr><td style="font-weight:600">에너지-배출 정합성</td><td>에너지 사용량 (자가신고)</td><td>에너지 투입 대비 배출량이 물리법칙에 부합하는지</td></tr>
+<tr><td style="font-weight:600">생산 규모 합리성</td><td>기업 제출 정보</td><td>EU 수출 규모로서 합리적인 생산량인지 체크 (향후 DART 재무 연동 시 매출 대비 배출 집약도 비교로 확장 예정)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="co ok"><b>왜 AI인가?</b> 단순 상한·하한 체크는 규칙으로도 됩니다. 하지만 "고로인데 에너지 사용량이 전기로 수준이면서 배출계수만 낮다"처럼 <b>다변량 패턴</b>을 잡으려면 ML(Isolation Forest, Autoencoder)이 필요합니다. 여러 변수를 동시에 보는 이상치 탐지는 규칙 기반으로는 조합 폭발이 일어납니다.</div>
+
+<div class="co info"><b>핵심 가치:</b> EU는 "실측 or 기본값"만 인정합니다. AI 스코어링은 EU 신고에 직접 사용하는 것이 <b>아닙니다.</b> 이 도구의 역할은 <b>"제출 전에 데이터 오류를 잡아주는 것"</b>과 <b>"실측할 가치가 있는지 판단하는 것"</b>입니다.</div>
+
+<!-- ========== DEMO 1: 품질 스코어링 ========== -->
+<div class="demo-box" id="demo1">
+<!-- Step Indicator -->
+<div class="step-indicator">
+  <div class="step-dot active" id="step-dot-1">1</div>
+  <div class="step-line" id="step-line-1"></div>
+  <div class="step-dot" id="step-dot-2">2</div>
+  <div class="step-line" id="step-line-2"></div>
+  <div class="step-dot" id="step-dot-3">3</div>
+</div>
+<div style="display:flex;gap:16px;margin-bottom:12px;flex-wrap:wrap">
+  <span class="step-label"><b>STEP 1/3</b> 품질 스코어링</span>
+  <span class="step-label" style="color:var(--light)">STEP 2/3 블록체인 기록</span>
+  <span class="step-label" style="color:var(--light)">STEP 3/3 비용 시뮬레이션</span>
+</div>
+
+<h4>▶ 직접 해보기 — 배출 데이터 품질 스코어링</h4>
+<div class="demo-grid demo-grid-2">
+<div>
+<label class="form-label">업종</label>
+<select id="q-sector" class="form-select">
+<option value="steel_bf">철강 (고로, BF-BOF)</option>
+<option value="steel_eaf">철강 (전기로, EAF)</option>
+<option value="aluminium">알루미늄</option>
+<option value="cement">시멘트</option>
+<option value="fertiliser">비료</option>
+<option value="hydrogen">수소</option>
+</select>
+</div>
+<div>
+<label class="form-label">배출계수 (tCO₂/톤 제품)</label>
+<input id="q-ef" type="number" step="0.01" value="1.95" class="form-input form-input-mono">
+</div>
+<div>
+<label class="form-label">에너지 사용량 (GJ/톤 제품)</label>
+<input id="q-energy" type="number" step="0.1" value="18.5" class="form-input form-input-mono">
+</div>
+<div>
+<label class="form-label">연간 생산량 (톤)</label>
+<input id="q-prod" type="number" step="1000" value="50000" class="form-input form-input-mono">
+</div>
+</div>
+<button onclick="runQualityScore()" class="form-btn form-btn-primary" style="margin-top:4px">검증 실행</button>
+
+<div id="q-result" style="display:none;margin-top:20px">
+<div class="demo-grid demo-grid-2">
+<div style="text-align:center;padding:20px;background:#fff;border-radius:var(--r)">
+<div id="q-score-num" style="font-family:var(--mono);font-size:48px;font-weight:800"></div>
+<div style="font-size:12px;color:var(--sub)">/100</div>
+<div id="q-score-label" style="font-size:13px;font-weight:700;margin-top:4px"></div>
+</div>
+<div id="q-details" style="background:#fff;border-radius:var(--r);padding:16px;font-size:12px;line-height:2"></div>
+</div>
+<!-- 분포 시각화 -->
+<div style="margin-top:16px;background:#fff;border-radius:var(--r);padding:16px">
+<h4 style="font-size:13px;margin:0 0 8px">업종별 배출계수 분포에서의 위치</h4>
+<canvas id="q-canvas" width="800" height="160" style="width:100%;height:auto"></canvas>
+<div id="q-dist-label" style="font-size:11px;color:var(--sub);margin-top:4px;text-align:center"></div>
+</div>
+</div>
+</div>
+
+<!-- 모듈 2 상세 -->
+<h3>모듈 2. 블록체인 인증 — "이 데이터, 나중에 바뀌지 않는다"</h3>
+
+<p class="body">품질 스코어링을 통과한 배출 데이터는 <strong>블록체인에 해시값으로 기록</strong>됩니다. 한 번 기록되면 수정·삭제가 불가능합니다.</p>
+
+<div class="cards cards-2">
+<div class="card">
+<h4>왜 블록체인인가?</h4>
+<p style="margin:8px 0">CBAM은 EU가 인정한 검증기관(accredited verifier)이 확인한 <strong>verified emissions</strong> 데이터를 요구합니다. 제출 후 수정 시 정식 정정 절차를 거쳐야 하므로, 최초 제출 데이터의 신뢰성이 매우 중요합니다.</p>
+<p>• <strong>변조 불가</strong> — 해시가 바뀌면 즉시 탐지</p>
+<p>• <strong>감사 추적(Audit Trail)</strong> — 언제, 누가, 어떤 데이터를 제출했는지 이력</p>
+<p>• <strong>EU DPP 참조 가능</strong> — 2027/2028년경 철강 등 우선 품목에 대해 디지털 제품 여권 단계적 의무화가 예상되며, 참조 가능한 민간 데이터 인프라로 활용 가능 (공식 인프라는 아님)</p>
+</div>
+<div class="card">
+<h4>기록되는 것</h4>
+<div class="table-wrap">
+<table style="margin:8px 0">
+<tbody>
+<tr><td style="font-weight:600">기업 ID</td><td>익명화된 식별자</td></tr>
+<tr><td style="font-weight:600">제품/CN코드</td><td>예: 7207 (철강 반제품)</td></tr>
+<tr><td style="font-weight:600">배출계수</td><td>예: 1.95 tCO₂/t</td></tr>
+<tr><td style="font-weight:600">품질 스코어</td><td>예: 87/100</td></tr>
+<tr><td style="font-weight:600">타임스탬프</td><td>제출 일시</td></tr>
+<tr><td style="font-weight:600">해시</td><td>SHA-256 해시</td></tr>
+</tbody>
+</table>
+</div>
+<p class="src">원본 데이터는 오프체인, 해시만 온체인 (비용/프라이버시)</p>
+</div>
+</div>
+
+<div class="co ok"><b>하나금융의 역할:</b> 이 블록체인은 <b>CBAM 공식 레지스트리(EU 중앙 시스템)와는 별도의 민간 데이터 인프라</b>입니다. 하나금융이 신뢰 노드로 참여하여, 한국 수출기업 ↔ EU 수입자 ↔ 검증기관 사이의 <b>데이터 변경 불가성(immutability)과 타임스탬프</b>를 제공합니다. 향후 EU DPP(2027/2028년경 단계적 의무화 예상) 연계 시 참조 로그로 활용될 수 있습니다.<br><span class="src">ESPR (EU Regulation 2024/1781, 2024.07 발효)</span></div>
+
+<!-- ========== DEMO 2: 블록체인 인증 ========== -->
+<div class="demo-box" id="demo2">
+<!-- Step Indicator -->
+<div class="step-indicator">
+  <div class="step-dot done" id="step2-dot-1">1</div>
+  <div class="step-line done" id="step2-line-1"></div>
+  <div class="step-dot active" id="step2-dot-2">2</div>
+  <div class="step-line" id="step2-line-2"></div>
+  <div class="step-dot" id="step2-dot-3">3</div>
+</div>
+<div style="display:flex;gap:16px;margin-bottom:12px;flex-wrap:wrap">
+  <span class="step-label" style="color:var(--light)">STEP 1/3 품질 스코어링</span>
+  <span class="step-label"><b>STEP 2/3 블록체인 기록</b></span>
+  <span class="step-label" style="color:var(--light)">STEP 3/3 비용 시뮬레이션</span>
+</div>
+
+<h4>▶ 직접 해보기 — 블록체인 인증 시뮬레이션</h4>
+<p style="font-size:12px;color:var(--sub);margin-bottom:12px">위 품질 스코어링 결과가 60점 이상이면 블록체인에 기록합니다. 아래 버튼을 누르면 SHA-256 해시가 생성됩니다.</p>
+<button onclick="runBlockchain()" id="bc-btn" class="form-btn form-btn-primary">블록체인에 기록</button>
+<span id="bc-gate" style="font-size:12px;color:var(--red);margin-left:12px"></span>
+
+<div id="bc-result" style="display:none;margin-top:20px">
+<!-- 블록 시각화 -->
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+<div id="bc-prev-block" style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:11px;text-align:center;min-width:120px">
+<div style="font-weight:700;margin-bottom:2px">Block #1041</div>
+<div style="font-family:var(--mono);font-size:9px;color:var(--sub)">0x7a3f...e2b1</div>
+</div>
+<div style="font-size:16px;color:var(--hana)">→</div>
+<div id="bc-new-block" style="background:var(--hana-light);border:2px solid var(--hana);border-radius:8px;padding:12px 16px;font-size:11px;text-align:center;min-width:120px">
+<div style="font-weight:700;color:var(--hana);margin-bottom:2px">Block #1042 (NEW)</div>
+<div id="bc-hash-short" style="font-family:var(--mono);font-size:9px;color:var(--hana-dark)"></div>
+</div>
+<div style="font-size:16px;color:var(--hana)">→</div>
+<div style="background:#fff;border:1px dashed var(--border);border-radius:8px;padding:12px 16px;font-size:11px;text-align:center;min-width:120px;color:var(--light)">
+<div style="font-weight:700;margin-bottom:2px">Block #1043</div>
+<div style="font-size:9px">다음 블록...</div>
+</div>
+</div>
+
+<!-- 상세 기록 -->
+<div style="background:#fff;border-radius:var(--r);padding:16px;font-family:var(--mono);font-size:11px;line-height:2.2">
+<div style="color:var(--sub);font-family:var(--sans);font-size:12px;font-weight:700;margin-bottom:8px">온체인 기록 내용</div>
+<div id="bc-record"></div>
+</div>
+
+<!-- 변조 감지 데모 -->
+<div style="margin-top:16px">
+<p style="font-size:12px;font-weight:600;margin-bottom:8px">변조 감지 테스트: 배출계수를 바꿔보세요</p>
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+<input id="bc-tamper" type="number" step="0.01" value="1.95" class="form-input form-input-mono" style="width:120px">
+<button onclick="checkTamper()" class="form-btn form-btn-danger" style="padding:12px 16px;font-size:12px">변조 검증</button>
+<span id="bc-tamper-result" style="font-size:12px;font-weight:600"></span>
+</div>
+</div>
+</div>
+</div>
+
+<!-- 모듈 3 상세 -->
+<h3>모듈 3. CBAM 비용 시뮬레이션 — "그래서 얼마야?"</h3>
+
+<p class="body">검증된 배출 데이터(EU 인정 검증기관이 확인한 verified emissions 또는 내부적으로 확정한 배출계수)를 기반으로, <strong>2026~2034년 연도별 CBAM 비용 경로</strong>를 산출합니다.</p>
+
+<div class="formula-box">
+CBAM 비용 = 수출량 × <b>[배출계수 − 벤치마크 × (1 − 무상할당 폐지율)]</b> × EUA 가격 × 환율<br>
+<span style="font-size:11px;color:var(--sub)">= 수출량 × [내재 배출량 − 무상할당 공제분] × EUA 가격 × 환율</span>
+</div>
+<div class="co info" style="font-size:12px"><b>공식 해설:</b> "무상할당 폐지율"이 올라갈수록 벤치마크 공제가 줄어들어 CBAM 부담이 커집니다.<br>
+• 2026년(폐지율 2.5%): 벤치마크의 97.5%가 공제 → 부담 적음<br>
+• 2034년(폐지율 100%): 공제 0% → 배출계수 전체에 대해 비용 발생<br>
+<span class="src">EU Regulation 2023/956, Art. 7; 계산 방법론 참고: CarbonChain CBAM Exposure Methodology (민간 방법론)</span></div>
+
+<div class="co warn"><b>K-ETS 공제에 대해:</b> 이론적으로 수출국에서 지불한 탄소 가격은 공제됩니다. 그러나 한국은 <b>무상할당 비율이 높아서 실제 "지불한" K-ETS 비용이 매우 적습니다.</b> 무상할당분은 "지불한 탄소 가격"이 아니므로 공제 불가. 따라서 실질 CBAM 부담은 "EU ETS − K-ETS" 단순 차감보다 <b>높을 수 있습니다.</b><br><span class="src">EU Regulation 2023/956, Art. 9</span></div>
+
+<h4>예시 시나리오 — 내부 모델 산출값 (철강 고로 BF-BOF, 배출계수 2.05, 벤치마크 1.370, 1만톤/연, ₩1,450/€)</h4>
+<div class="table-wrap">
+<table>
+<thead><tr><th>연도</th><th>폐지율</th><th>Net Zero 2050</th><th>Below 2°C</th><th>Delayed</th><th>Current Policies</th></tr></thead>
+<tbody>
+<tr><td style="font-weight:600">2026</td><td class="mono">2.5%</td><td class="mono">7.5억</td><td class="mono">7.0억</td><td class="mono">6.7억</td><td class="mono">6.4억</td></tr>
+<tr><td style="font-weight:600">2028</td><td class="mono">10%</td><td class="mono">10.7억</td><td class="mono">9.5억</td><td class="mono">8.3억</td><td class="mono">7.7억</td></tr>
+<tr><td style="font-weight:600">2030</td><td class="mono hl">48.5%</td><td class="mono hl">22.4억</td><td class="mono">18.5억</td><td class="mono">16.0억</td><td class="mono">13.6억</td></tr>
+<tr><td style="font-weight:600">2034</td><td class="mono red">100%</td><td class="mono red">49.0억</td><td class="mono">37.2억</td><td class="mono">37.2억</td><td class="mono">25.3억</td></tr>
+</tbody>
+</table>
+</div>
+<p class="src">공식: 수출량 × [배출계수 2.05 − 벤치마크 1.370 × (1−폐지율)] × EUA 가격 × 환율. 벤치마크 1.370: Eurometal/S&P Global (HRC BF-BOF, IR 2025/2620). 탄소가격 경로(EUA 수준에 상응): NGFS Phase V (2024.11) 기반. K-ETS 공제 미반영 (보수적 추정).</p>
+
+<!-- ========== DEMO 3: CBAM 비용 시뮬레이션 ========== -->
+<div class="demo-box" id="demo3">
+<!-- Step Indicator -->
+<div class="step-indicator">
+  <div class="step-dot done" id="step3-dot-1">1</div>
+  <div class="step-line done" id="step3-line-1"></div>
+  <div class="step-dot done" id="step3-dot-2">2</div>
+  <div class="step-line done" id="step3-line-2"></div>
+  <div class="step-dot active" id="step3-dot-3">3</div>
+</div>
+<div style="display:flex;gap:16px;margin-bottom:12px;flex-wrap:wrap">
+  <span class="step-label" style="color:var(--light)">STEP 1/3 품질 스코어링</span>
+  <span class="step-label" style="color:var(--light)">STEP 2/3 블록체인 기록</span>
+  <span class="step-label"><b>STEP 3/3 비용 시뮬레이션</b></span>
+</div>
+
+<h4>▶ 직접 해보기 — CBAM 비용 시뮬레이션</h4>
+
+<div class="demo-grid demo-grid-3">
+<div>
+<label class="form-label">업종</label>
+<select id="sim-sector" onchange="updateSim()" class="form-select">
+<option value="steel_bf">철강 (고로)</option>
+<option value="steel_eaf">철강 (전기로)</option>
+<option value="aluminium">알루미늄</option>
+<option value="cement">시멘트</option>
+<option value="fertiliser">비료</option>
+<option value="hydrogen">수소</option>
+</select>
+</div>
+<div>
+<label class="form-label">연간 수출량 (톤): <span id="sim-vol-val" class="mono" style="color:var(--hana)">10,000</span></label>
+<input id="sim-vol" type="range" min="1000" max="100000" step="1000" value="10000" oninput="updateSim()" class="form-range">
+</div>
+<div>
+<label class="form-label">환율 (₩/€): <span id="sim-fx-val" class="mono" style="color:var(--hana)">1,450</span></label>
+<input id="sim-fx" type="range" min="1200" max="1700" step="10" value="1450" oninput="updateSim()" class="form-range">
+</div>
+</div>
+
+<div class="demo-grid demo-grid-2" style="margin-top:8px">
+<div>
+<label class="form-label">배출계수 (tCO₂/t): <span id="sim-ef-val" class="mono" style="color:var(--hana)">2.05</span></label>
+<input id="sim-ef" type="range" min="0.5" max="5.0" step="0.05" value="2.05" oninput="updateSim()" class="form-range">
+</div>
+<div>
+<label class="form-label">제품 벤치마크: <span id="sim-bm-val" class="mono" style="color:var(--blue)">1.52</span> tCO₂/t | 데이터 유형</label>
+<select id="sim-data-type" onchange="updateSim()" class="form-select">
+<option value="actual">실측 데이터 제출</option>
+<option value="default">EU 기본값 적용 (데이터 없음)</option>
+</select>
+</div>
+</div>
+
+<!-- 비용 차트 -->
+<div style="background:#fff;border-radius:var(--r);padding:20px;margin-top:8px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+<h4 style="margin:0;font-size:14px">연도별 CBAM 비용 경로</h4>
+<div id="sim-saving" style="font-size:13px;font-weight:700;color:var(--hana)"></div>
+</div>
+<canvas id="sim-canvas" width="800" height="300" style="width:100%;height:auto"></canvas>
+<div style="display:flex;gap:16px;margin-top:12px;font-size:11px;justify-content:center;flex-wrap:wrap">
+<span><span style="display:inline-block;width:12px;height:3px;background:#C62828;vertical-align:middle;margin-right:4px"></span>Net Zero 2050</span>
+<span><span style="display:inline-block;width:12px;height:3px;background:#E65100;vertical-align:middle;margin-right:4px"></span>Below 2°C</span>
+<span><span style="display:inline-block;width:12px;height:3px;background:#1565C0;vertical-align:middle;margin-right:4px"></span>Delayed</span>
+<span><span style="display:inline-block;width:12px;height:3px;background:#5A6370;vertical-align:middle;margin-right:4px"></span>Current Policies</span>
+</div>
+</div>
+
+<!-- 연도별 테이블 -->
+<div class="table-wrap" style="margin-top:16px">
+<table id="sim-table" style="font-size:11px">
+<thead><tr><th>연도</th><th>폐지율</th><th>Net Zero</th><th>Below 2°C</th><th>Delayed</th><th>Current</th></tr></thead>
+<tbody id="sim-tbody"></tbody>
+</table>
+</div>
+
+<!-- 기본값 vs 실측 비교 -->
+<div id="sim-compare" style="margin-top:16px;background:var(--red-bg);border:1px solid var(--red-border);border-radius:var(--r);padding:16px;display:none">
+<h4 style="margin:0 0 8px;font-size:13px;color:var(--red)">기본값 vs 실측 — 2034년 기준 비용 차이</h4>
+<div class="demo-grid cmp-grid" style="grid-template-columns:1fr 1fr 1fr;text-align:center">
+<div><div id="cmp-default" style="font-family:var(--mono);font-size:24px;font-weight:800;color:var(--red)"></div><div style="font-size:11px;color:var(--sub)">기본값 적용 시</div></div>
+<div><div id="cmp-actual" style="font-family:var(--mono);font-size:24px;font-weight:800;color:var(--hana)"></div><div style="font-size:11px;color:var(--sub)">실측 제출 시</div></div>
+<div><div id="cmp-save" style="font-family:var(--mono);font-size:24px;font-weight:800;color:var(--orange)"></div><div style="font-size:11px;color:var(--sub)">연간 절감액</div></div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<hr>
+
+<!-- ==================== 03. 전체 흐름 ==================== -->
+<div class="sec fade-in" id="sec03">
+<div class="w">
+<div class="sec-num">03 — ESG TradeGuard 안에서의 위치</div>
+<div class="sec-title">기존 플랫폼 위에 얹힙니다</div>
+<div class="sec-sub">다른 팀원이 만든 OCR → 규제매칭 → 위성 검증 흐름 위에, CBAM 비용 분석만 교체합니다.</div>
+
+<div class="flow">
+<div class="flow-step"><h5>Step 1</h5><p>서류 업로드<br>(READIT OCR)</p></div>
+<div class="flow-arrow">→</div>
+<div class="flow-step"><h5>Step 2</h5><p>OCR 파싱<br>(HS코드, 수량)</p></div>
+<div class="flow-arrow">→</div>
+<div class="flow-step"><h5>Step 3</h5><p>규제 매칭<br>(CBAM/EUDR)</p></div>
+<div class="flow-arrow">→</div>
+<div class="flow-step active"><h5>Step 4 ★</h5><p><strong>CarbonCast</strong><br>품질검증→인증→비용</p></div>
+<div class="flow-arrow">→</div>
+<div class="flow-step"><h5>Step 5</h5><p>위성 NDVI<br>(환경 검증)</p></div>
+<div class="flow-arrow">→</div>
+<div class="flow-step"><h5>Step 6</h5><p>최종 리포트</p></div>
+</div>
+
+<p style="text-align:center;font-size:12px;color:var(--hana);margin-top:8px">★ 이 모듈이 CarbonCast. 나머지는 팀원이 담당.</p>
+
+<h3>데이터 흐름</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>단계</th><th>입력 (어디서 오나)</th><th>CarbonCast가 하는 것</th><th>출력 (어디로 가나)</th></tr></thead>
+<tbody>
+<tr><td style="font-weight:600">Step 3에서 받는 것</td><td>HS코드, 수출국, 수량, 금액</td><td>CBAM 대상 여부 확인 + 제품별 기본값 매핑</td><td>—</td></tr>
+<tr><td style="font-weight:600">기업 추가 입력</td><td>배출계수, 공정 유형, 에너지 사용량</td><td>AI 품질 스코어링 → 블록체인 기록</td><td>—</td></tr>
+<tr><td style="font-weight:600">비용 산출</td><td>검증된 배출계수 + 시나리오 파라미터</td><td>CBAM 비용 경로 계산</td><td>Step 6 리포트에 포함</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="co info"><b>"기업 추가 입력"이 없으면?</b> 배출계수를 모르는 기업은 EU 기본값이 자동 적용됩니다. 이때 CarbonCast는 <b>"기본값 대비 실측 시 얼마를 아낄 수 있는지"</b>를 보여줘서, 기업이 실측 데이터를 확보할 동기를 만듭니다.</div>
+</div>
+</div>
+
+<hr>
+
+<!-- ==================== 04. 왜 하나금융인가 ==================== -->
+<div class="sec sec-alt fade-in" id="sec04">
+<div class="w">
+<div class="sec-num">04 — 왜 하나금융인가</div>
+<div class="sec-title">이 조합은 하나금융 위에서만 작동합니다</div>
+<div class="sec-sub">컨설팅사에는 금융 데이터가 없고, 핀테크에는 한국 기업 접점이 없습니다.</div>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>CarbonCast에 필요한 것</th><th>하나금융이 가진 것</th><th>출처</th></tr></thead>
+<tbody>
+<tr><td style="font-weight:600">수출서류 HS코드 추출</td><td>READIT OCR — GS인증 1등급, 연 약 8만건 처리 (내부 집계)</td><td class="src">에너지경제 (2025.08), 처리량은 내부 기준</td></tr>
+<tr><td style="font-weight:600">무역금융 고객 기반</td><td>글로벌파이낸스 25회 연속 수상, 3,500+ 기업 (내부 집계 추정)</td><td class="src">뉴스1 (2026.03), 고객 수는 하나은행 IR 기반 추정</td></tr>
+<tr><td style="font-weight:600">AI/ML 개발 역량</td><td>융합기술원 73명 석박사, 262건 연구과제</td><td class="src">에너지경제 (2025.08)</td></tr>
+<tr><td style="font-weight:600">포트폴리오 탄소 분석</td><td>PCAF 7개 범주 금융배출량 산정 체계</td><td class="src">한국경제 (2025.03)</td></tr>
+<tr><td style="font-weight:600">ESG 금융 상품 연계</td><td>ESG 금융 실적 37조 원</td><td class="src">한국경제 (2025.03)</td></tr>
+<tr><td style="font-weight:600">AI 여신 심사 인프라</td><td>AI 지능형 여신 심사 도입, 연 2.7만 시간 절감</td><td class="src">헤럴드경제 (2026.03)</td></tr>
+<tr><td style="font-weight:600">블록체인 경험</td><td>비트고 코리아 지분 투자, 융합기술원 블록체인 연구</td><td class="src">에너지경제 (2025.08), 하나금융 디지털 성과</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>경쟁 비교</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>솔루션</th><th>강점</th><th>한계</th><th>CarbonCast 차별점</th></tr></thead>
+<tbody>
+<tr><td style="font-weight:600">CarbonChain</td><td>무역금융 특화, ING 등 사용</td><td>한국 기업 데이터 접점 없음. 한국어 미지원.</td><td>하나은행 3,500 무역금융 고객 직접 접근</td></tr>
+<tr><td style="font-weight:600">Carbmee</td><td>SAP 연동, 공급망 Scope 3</td><td>CBAM 전용이 아님. 비용 시뮬레이션 약함.</td><td>CBAM phase-in + 시나리오 특화</td></tr>
+<tr><td style="font-weight:600">EY/KPMG 컨설팅</td><td>대기업 대상, 깊은 전문성</td><td>통상 건당 수천만 원 수준 (시장 추정). 중소기업 접근 어려움.</td><td>B2B SaaS 월 30만 원 수준 (목표 가격). 중소기업 접근 가능.</td></tr>
+<tr><td style="font-weight:600">환경부 CBAM 지원사업</td><td>무료, 정부 지원</td><td>대상 기업 수 제한. 개별 맞춤 어려움.</td><td>상시 이용 가능. 하나은행 고객이면 자동 접근.</td></tr>
+</tbody>
+</table>
+</div>
+<div class="co ok"><b>CarbonCast의 포지션:</b> "데이터 품질 사전 검증 + 기본값 vs 실측 비용 비교"를 <b>은행 무역금융 프로세스 안에서</b> 제공하는 도구. 별도 컨설팅 없이, 수출서류 제출 과정에서 자연스럽게 CBAM 대응이 시작됨.</div>
+</div>
+</div>
+
+<hr>
+
+<!-- ==================== 05. 누가 쓰나 ==================== -->
+<div class="sec fade-in" id="sec05">
+<div class="w">
+<div class="sec-num">05 — 누가, 어떻게 쓰나</div>
+<div class="sec-title">사용 시나리오</div>
+<div class="sec-sub">수출기업과 은행 심사역, 두 가지 사용자.</div>
+
+<h3>시나리오 A: 수출기업이 EU 바이어에게 데이터를 보내야 할 때</h3>
+<div class="card card-border-blue" style="margin:16px 0">
+<h4>상황</h4>
+<p style="margin:8px 0">(주)그린텍, 알루미늄 프로파일 EU 수출. EU 수입자(Authorized CBAM Declarant)가 "배출 데이터를 보내라"고 요청.</p>
+<h4>Track A — 데이터가 있는 경우</h4>
+<p style="margin:4px 0">1. ESG TradeGuard에 수출서류 업로드 → OCR이 HS코드·수량 추출</p>
+<p style="margin:4px 0">2. 배출 데이터 입력 (공정 유형·에너지 사용량·배출계수)</p>
+<p style="margin:4px 0">3. <strong>AI 품질 스코어:</strong> "87점 — 신뢰 가능. EU verifier 검증 전 오류 없음"</p>
+<p style="margin:4px 0">4. <strong>블록체인 기록:</strong> 제출 이력 보관. 향후 감사 시 증빙.</p>
+<p style="margin:4px 0">5. <strong>비용 시뮬레이션:</strong> 실측 기반 CBAM 비용 경로 → EU 수입자에게 제공</p>
+<h4 style="margin-top:12px">Track B — 데이터가 없는 경우</h4>
+<p style="margin:4px 0">1. 업종과 수출량만 입력</p>
+<p style="margin:4px 0">2. <strong>"기본값 적용 시 연 3.2억, 실측 확보 시 연 1.1억 → <span class="hl">연 2.1억 절감 가능</span>"</strong></p>
+<p style="margin:4px 0">3. → "실측 데이터를 확보할 경제적 이유"가 숫자로 보임. 대응 동기 생성.</p>
+</div>
+
+<h3>시나리오 B: 하나은행 심사역이 PF 대출을 심사할 때</h3>
+<div class="card card-border-hana" style="margin:16px 0">
+<h4>상황</h4>
+<p style="margin:8px 0">철강 수출기업이 3,000억 PF 대출 신청. 20년짜리. CBAM 비용은 얼마나 반영해야 하나?</p>
+<h4>CarbonCast 사용</h4>
+<p style="margin:4px 0">1. 차주 업종/수출 비중 입력 → 4개 시나리오별 비용 경로 즉시 산출</p>
+<p style="margin:4px 0">2. "2030년부터 Net Zero 시나리오 기준 연 22억 탄소비용 → EBITDA 영향 확인"</p>
+<p style="margin:4px 0">3. 심사보고서에 시뮬레이션 결과 첨부 → 탄소비용 반영 여부의 근거</p>
+</div>
+
+<h3>수익 모델</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>대상</th><th>과금 방식</th><th>가격</th></tr></thead>
+<tbody>
+<tr><td style="font-weight:600">수출기업 (B2B SaaS)</td><td>월 구독</td><td>월 30만 원 수준 목표 (ESG TradeGuard 내 CBAM 모듈)</td></tr>
+<tr><td style="font-weight:600">하나은행 내부</td><td>내부 도구</td><td>여신 심사 프로세스에 통합 (별도 과금 없음)</td></tr>
+<tr><td style="font-weight:600">CBAM 컨설팅 연계</td><td>건당</td><td>실측 데이터 확보 컨설팅 연계 시 수수료</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+<hr>
+
+<!-- ==================== 06. 기술 상세 (접기) ==================== -->
+<div class="sec sec-alt fade-in" id="sec06">
+<div class="w">
+<div class="sec-num">06 — 기술 상세</div>
+<div class="sec-title">어떻게 만드는가</div>
+<div class="sec-sub">각 모듈의 기술 선택과 이유. (클릭하여 펼치기)</div>
+
+<details><summary>▸ 모듈 1. 품질 스코어링 — 기술 스택 (클릭하여 펼치기)</summary>
+<div class="table-wrap">
+<table>
+<thead><tr><th>항목</th><th>선택</th><th>이유</th></tr></thead>
+<tbody>
+<tr><td style="font-weight:600">이상치 탐지</td><td>Isolation Forest + KDE</td><td>다변량 이상치를 잡으면서도 해석 가능. 합성 데이터로도 학습 가능.</td></tr>
+<tr><td style="font-weight:600">물리적 범위 체크</td><td>규칙 기반 (하한/상한)</td><td>공정별 물리적 한계는 규칙이 확실. AI와 하이브리드.</td></tr>
+<tr><td style="font-weight:600">학습 데이터</td><td>K-ETS 명세서 (data.go.kr/15053947)</td><td>약 800여 개 사업장, 공개 데이터. 업종별 배출 분포 구축.</td></tr>
+<tr><td style="font-weight:600">스코어링</td><td>0~100 정규화</td><td>Isolation Forest anomaly score + 물리 체크 가중 합산.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="co info"><b>왜 ML이 필요한가?</b> "고로인데 배출계수가 0.8" 같은 단순 케이스는 규칙으로도 잡습니다. 하지만 <b>"고로인데 에너지 사용량이 전기로 수준이면서 배출계수만 살짝 낮다"</b>처럼 여러 변수가 동시에 미묘하게 어긋나는 패턴은 규칙 조합이 기하급수적으로 늘어납니다. ML은 이 <b>다변량 이상치(multivariate anomaly)</b>를 자동으로 학습합니다.</div>
+
+</details>
+<details><summary>▸ 모듈 2. 블록체인 기록 — 기술 스택 (클릭하여 펼치기)</summary>
+<div class="table-wrap">
+<table>
+<thead><tr><th>항목</th><th>선택</th><th>이유</th></tr></thead>
+<tbody>
+<tr><td style="font-weight:600">네트워크</td><td>Ethereum Sepolia 테스트넷 (프로토타입)<br>→ Hyperledger Fabric (실전)</td><td>프로토타입은 퍼블릭 체인으로 빠르게 데모. 실전은 허가형 체인으로 전환.</td></tr>
+<tr><td style="font-weight:600">스마트 컨트랙트</td><td>Solidity (EVM 호환)</td><td>데이터 해시 + 메타데이터(기업ID, CN코드, 스코어) 기록.</td></tr>
+<tr><td style="font-weight:600">데이터 구조</td><td>온체인: SHA-256 해시 + 메타데이터<br>오프체인: 원본 데이터 (DB)</td><td>비용 절감 + 프라이버시. 원본은 하나금융 DB, 해시만 체인.</td></tr>
+<tr><td style="font-weight:600">검증</td><td>해시 비교</td><td>나중에 원본과 온체인 해시를 대조하면 변조 여부 즉시 확인.</td></tr>
+</tbody>
+</table>
+</div>
+
+</details>
+<details><summary>▸ 모듈 3. CBAM 비용 시뮬레이션 — 기술 스택 (클릭하여 펼치기)</summary>
+<div class="table-wrap">
+<table>
+<thead><tr><th>항목</th><th>선택</th><th>이유</th></tr></thead>
+<tbody>
+<tr><td style="font-weight:600">비용 공식</td><td>EU Regulation 2023/956 기반</td><td>수식 기반. AI가 아님. 정확해야 하므로.</td></tr>
+<tr><td style="font-weight:600">시나리오</td><td>NGFS Phase V, 4개 경로</td><td>TCFD/ISSB 권고에 부합. IIASA Explorer에서 공개.</td></tr>
+<tr><td style="font-weight:600">대시보드</td><td>Streamlit + Plotly</td><td>인터랙티브 슬라이더, 2주 내 구현 가능.</td></tr>
+<tr><td style="font-weight:600">EU ETS 가격 데이터</td><td>Yahoo Finance (ICE EUA Futures)</td><td>무료, 지연 시세. 비용 시뮬레이션에 충분한 해상도.</td></tr>
+</tbody>
+</table>
+</div>
+</details>
+</div>
+</div>
+
+<hr>
+
+<!-- ==================== 07. 프로토타입 현황 ==================== -->
+<div class="sec sec-alt fade-in" id="sec07">
+<div class="w">
+<div class="sec-num">07 — 현황</div>
+<div class="sec-title">프로토타입은 합성 데이터로 돌아갑니다</div>
+<div class="sec-sub">하나금융 실 데이터를 연결하면 실전 전환이 가능한 구조.</div>
+
+<div class="ba">
+<div class="ba-col before">
+<h4>프로토타입 (지금)</h4>
+<ul>
+<li>K-ETS 공개 데이터 + 합성 데이터로 학습</li>
+<li>Sepolia 테스트넷에 해시 기록</li>
+<li>NGFS 시나리오 기반 비용 시뮬레이션</li>
+<li>Streamlit 대시보드</li>
+</ul>
+</div>
+<div class="ba-col after">
+<h4>실전 (하나금융 데이터 연결 시)</h4>
+<ul>
+<li>3,500개 무역금융 고객의 실 배출 데이터</li>
+<li>Hyperledger Fabric 허가형 체인</li>
+<li>AI 여신 심사 시스템과 연동</li>
+<li>READIT OCR → CarbonCast 자동 파이프라인</li>
+</ul>
+</div>
+</div>
+
+<div class="co ok"><b>핵심 메시지:</b> 프로토타입의 목적은 "완성품"을 보여주는 것이 아닙니다. <b>"데이터만 연결하면 바로 작동하는 구조가 이미 있다"</b>를 증명하는 것입니다.</div>
+</div>
+</div>
+
+<hr>
+
+<!-- ==================== 08. 출처 ==================== -->
+<div class="sec sec-alt fade-in" id="sec08">
+<div class="w">
+<div class="sec-num">08 — 출처</div>
+<div class="sec-title">모든 수치의 근거</div>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>분류</th><th>출처</th></tr></thead>
+<tbody>
+<tr><td style="font-weight:600">EU 규제</td><td>EU Regulation 2023/956 (CBAM) · EU IR 2025/2621 (기본값) · ESPR 2024/1781 (DPP, 2024.07 발효)</td></tr>
+<tr><td style="font-weight:600">시나리오/데이터</td><td>NGFS Phase V (2024.11, IIASA Explorer) · K-ETS 명세서 (data.go.kr/15053947) · 관세청 한-EU 품목 연계표 (2026.02) · DART Open API</td></tr>
+<tr><td style="font-weight:600">한국 기업 현황</td><td>중소기업중앙회 CBAM 인식 조사 (2023) · 포스코 탈탄소 로드맵 (sustainability.posco.co.kr) · 한국은행·금감원 기후 스트레스테스트 (2025.03)</td></tr>
+<tr><td style="font-weight:600">하나금융</td><td>에너지경제 2025.08 (융합기술원) · AI타임스 2025.05 (AI 수출환어음) · 뉴스1 2026.03 (무역금융 25회) · 한국경제 2025.03 (ESG 37조, PCAF) · 이투데이 2025.11 (KSSB) · 헤럴드경제 2026.03 (AI 여신심사)</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+<!-- ==================== QUOTE ==================== -->
+<div class="w" style="padding-top:40px;padding-bottom:40px">
+<div class="quote fade-in">
+<p>"배출 데이터의 신뢰성을 AI로 검증하고,<br>블록체인으로 인증하고,<br>그 위에서 CBAM 비용을 계산합니다.<br><br>데이터 품질이 보증된 CBAM 비용 시뮬레이션.<br>이것이 CarbonCast입니다."</p>
+</div>
+</div>
+
+<!-- ==================== FOOTER ==================== -->
+<div class="footer">
+<p>CarbonCast v2 · ESG TradeGuard CBAM Module<br>하나 청년 금융인재 양성 프로젝트 · 2026.03</p>
+</div>
+
+<script>
+// ===== 업종별 데이터 =====
+// 출처: EU IR 2025/2621 (기본값), EU IR 2025/2620 (벤치마크), Eurometal/S&P Global (확인)
+// ※ 표시: 공식 문서에서 직접 확인 못 한 예시값 (IR 2025/2621 Annex에 있으나 웹에서 추출 불가)
+const SECTORS = {
+  steel_bf:   { name:'철강(고로, BF-BOF)', mean:2.05, std:0.15, min:1.6, max:2.5, energy_mean:18.5, energy_std:2.0, energy_min:14, energy_max:24, eu_default:3.00, markup_2026:1.10, markup_2027:1.20, markup_2028:1.30, benchmark:1.370 },
+  // ↑ 기본값 3.00: SteelRadar/IR 2025/2621 확인. 벤치마크 1.370: Eurometal/S&P Global 확인 (HRC 기준)
+  steel_eaf:  { name:'철강(전기로, Scrap EAF)', mean:0.45, std:0.10, min:0.2, max:0.9, energy_mean:5.5, energy_std:1.2, energy_min:3, energy_max:9, eu_default:3.00, markup_2026:1.10, markup_2027:1.20, markup_2028:1.30, benchmark:0.072 },
+  // ↑ 기본값 3.00: 동일 CN 7207. 벤치마크 0.072: Eurometal 확인 (scrap EAF)
+  aluminium:  { name:'알루미늄 ※', mean:1.60, std:0.25, min:0.8, max:2.5, energy_mean:14.0, energy_std:3.0, energy_min:7, energy_max:22, eu_default:4.90, markup_2026:1.10, markup_2027:1.20, markup_2028:1.30, benchmark:1.514 },
+  // ↑ 기본값 4.9: Coolset 예시값 (직접+간접 합산 추정). 벤치마크 1.514: 미확인 예시값
+  cement:     { name:'시멘트(클링커)', mean:0.64, std:0.06, min:0.45, max:0.85, energy_mean:3.5, energy_std:0.5, energy_min:2.5, energy_max:5.0, eu_default:0.87, markup_2026:1.10, markup_2027:1.20, markup_2028:1.30, benchmark:0.666 },
+  // ↑ 기본값 0.87: SteelRadar (알바니아 grey clinker 예시). 벤치마크 0.666: 검색결과 확인
+  fertiliser: { name:'비료(암모니아) ※', mean:2.30, std:0.35, min:1.5, max:3.5, energy_mean:28.0, energy_std:4.0, energy_min:20, energy_max:38, eu_default:3.60, markup_2026:1.01, markup_2027:1.01, markup_2028:1.01, benchmark:1.96 },
+  // ↑ 기본값/벤치마크 미확인 예시값. 비료 마크업은 1%만 적용 (co2-iq.com 확인)
+  hydrogen:   { name:'수소 ※', mean:9.00, std:1.50, min:5, max:13, energy_mean:45, energy_std:8, energy_min:25, energy_max:65, eu_default:12.0, markup_2026:1.10, markup_2027:1.20, markup_2028:1.30, benchmark:8.85 }
+  // ↑ 기본값/벤치마크 미확인 예시값
+};
+
+// NGFS EU ETS 가격 경로 (€/tCO₂) — Phase V 기반 근사
+const ETS_PRICES = {
+  nz:      {2026:72,2027:80,2028:90,2029:102,2030:115,2031:128,2032:140,2033:152,2034:165},
+  b2:      {2026:68,2027:73,2028:80,2029:88,2030:95,2031:103,2032:110,2033:118,2034:125},
+  delayed: {2026:65,2027:67,2028:70,2029:75,2030:82,2031:90,2032:100,2033:112,2034:125},
+  current: {2026:62,2027:63,2028:65,2029:68,2030:70,2031:73,2032:76,2033:80,2034:85}
+};
+
+// Phase-in (EU ETS 무상할당 폐지율)
+const PHASE_IN = {2026:0.025,2027:0.05,2028:0.10,2029:0.225,2030:0.485,2031:0.61,2032:0.735,2033:0.86,2034:1.0};
+
+// ===== 저장용 =====
+let lastScoreData = null;
+let lastHash = null;
+
+// ===== 유틸 =====
+function gaussian(x, mean, std) {
+  return Math.exp(-0.5*((x-mean)/std)**2) / (std*Math.sqrt(2*Math.PI));
+}
+function fmt(n) { return n.toLocaleString('ko-KR'); }
+function fmtBil(n) {
+  if(Math.abs(n)>=10000) return (n/10000).toFixed(1)+'조';
+  return n.toFixed(1)+'억';
+}
+
+// ===== SHA-256 (순수 JS, file:// 환경 호환) =====
+async function sha256(msg) {
+  // crypto.subtle이 있으면 사용 (HTTPS/localhost), 없으면 순수 JS fallback
+  if(typeof crypto!=='undefined' && crypto.subtle) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
+    return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  }
+  // 순수 JS SHA-256 (file:// 환경용)
+  function rightRotate(v,n){return(v>>>n)|(v<<(32-n))}
+  const K=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+    0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+    0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+    0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+    0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+    0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+    0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+    0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+  let H=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+  const bytes=new TextEncoder().encode(msg);
+  const bits=bytes.length*8;
+  const padded=new Uint8Array(Math.ceil((bytes.length+9)/64)*64);
+  padded.set(bytes);padded[bytes.length]=0x80;
+  const dv=new DataView(padded.buffer);
+  dv.setUint32(padded.length-4,bits,false);
+  for(let off=0;off<padded.length;off+=64){
+    const w=new Uint32Array(64);
+    for(let i=0;i<16;i++)w[i]=dv.getUint32(off+i*4,false);
+    for(let i=16;i<64;i++){
+      const s0=rightRotate(w[i-15],7)^rightRotate(w[i-15],18)^(w[i-15]>>>3);
+      const s1=rightRotate(w[i-2],17)^rightRotate(w[i-2],19)^(w[i-2]>>>10);
+      w[i]=(w[i-16]+s0+w[i-7]+s1)|0;
+    }
+    let[a,b,c,d,e,f,g,h]=H;
+    for(let i=0;i<64;i++){
+      const S1=rightRotate(e,6)^rightRotate(e,11)^rightRotate(e,25);
+      const ch=(e&f)^(~e&g);
+      const t1=(h+S1+ch+K[i]+w[i])|0;
+      const S0=rightRotate(a,2)^rightRotate(a,13)^rightRotate(a,22);
+      const maj=(a&b)^(a&c)^(b&c);
+      const t2=(S0+maj)|0;
+      h=g;g=f;f=e;e=(d+t1)|0;d=c;c=b;b=a;a=(t1+t2)|0;
+    }
+    H[0]=(H[0]+a)|0;H[1]=(H[1]+b)|0;H[2]=(H[2]+c)|0;H[3]=(H[3]+d)|0;
+    H[4]=(H[4]+e)|0;H[5]=(H[5]+f)|0;H[6]=(H[6]+g)|0;H[7]=(H[7]+h)|0;
+  }
+  return H.map(v=>(v>>>0).toString(16).padStart(8,'0')).join('');
+}
+
+// ===== devicePixelRatio canvas helper =====
+function setupHiDPICanvas(canvas, w, h) {
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = w + 'px';
+  canvas.style.height = 'auto';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  return ctx;
+}
+
+// ===== NAV: hamburger toggle =====
+document.getElementById('hamburger').addEventListener('click', function() {
+  this.classList.toggle('open');
+  document.getElementById('nav-links').classList.toggle('show');
+});
+// Close nav on link click (mobile)
+document.querySelectorAll('.nav-links a').forEach(a => {
+  a.addEventListener('click', () => {
+    document.getElementById('hamburger').classList.remove('open');
+    document.getElementById('nav-links').classList.remove('show');
+  });
+});
+
+// ===== NAV: active section highlight =====
+const navLinks = document.querySelectorAll('.nav-links a');
+const sections = document.querySelectorAll('.sec[id]');
+function updateActiveNav() {
+  let current = '';
+  sections.forEach(sec => {
+    const top = sec.offsetTop - 80;
+    if(window.scrollY >= top) current = sec.getAttribute('id');
+  });
+  navLinks.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+}
+window.addEventListener('scroll', updateActiveNav, {passive:true});
+
+// ===== FADE-IN on scroll =====
+// JS가 정상 작동할 때만 애니메이션 활성화. 실패하면 기본 보임.
+try {
+  document.body.classList.add('js-ready');
+  const fadeEls = document.querySelectorAll('.fade-in');
+  const fadeObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, {threshold:0.08});
+  fadeEls.forEach(el => fadeObserver.observe(el));
+} catch(e) { /* fade-in 실패 시 기본 보임 상태 유지 */ }
+
+// ===== STEP INDICATOR UPDATE =====
+function updateStepIndicators(step) {
+  // Demo 1
+  for(let i=1;i<=3;i++){
+    const d = document.getElementById('step-dot-'+i);
+    if(d){d.className='step-dot';if(i<step)d.classList.add('done');if(i===step)d.classList.add('active');}
+    if(i<3){const l=document.getElementById('step-line-'+i);if(l){l.className='step-line';if(i<step)l.classList.add('done');}}
+  }
+  // Demo 2
+  for(let i=1;i<=3;i++){
+    const d = document.getElementById('step2-dot-'+i);
+    if(d){d.className='step-dot';if(i<step)d.classList.add('done');if(i===step)d.classList.add('active');}
+    if(i<3){const l=document.getElementById('step2-line-'+i);if(l){l.className='step-line';if(i<step)l.classList.add('done');}}
+  }
+  // Demo 3
+  for(let i=1;i<=3;i++){
+    const d = document.getElementById('step3-dot-'+i);
+    if(d){d.className='step-dot';if(i<step)d.classList.add('done');if(i===step)d.classList.add('active');}
+    if(i<3){const l=document.getElementById('step3-line-'+i);if(l){l.className='step-line';if(i<step)l.classList.add('done');}}
+  }
+}
+
+// ===== DATA SYNC: Demo1 → Demo2, Demo3 =====
+function syncToDemo3(data) {
+  if(!data) return;
+  // Sync sector
+  const simSector = document.getElementById('sim-sector');
+  if(simSector){
+    for(let i=0;i<simSector.options.length;i++){
+      if(simSector.options[i].value === data.sector){simSector.selectedIndex=i;break;}
+    }
+  }
+  // Sync EF
+  const efSlider = document.getElementById('sim-ef');
+  if(efSlider){
+    const s = SECTORS[data.sector];
+    efSlider.min = Math.max(0.1, s.mean - 3*s.std).toFixed(2);
+    efSlider.max = (s.mean + 3*s.std).toFixed(2);
+    efSlider.value = data.ef;
+    updateSim._lastSector = data.sector;
+  }
+  updateSim();
+}
+
+// ===== DEMO 1: 품질 스코어링 =====
+function runQualityScore() {
+  const sectorKey = document.getElementById('q-sector').value;
+  const ef = parseFloat(document.getElementById('q-ef').value);
+  const energy = parseFloat(document.getElementById('q-energy').value);
+  const prod = parseFloat(document.getElementById('q-prod').value);
+  const s = SECTORS[sectorKey];
+
+  // 입력값 유효성 검증
+  if(isNaN(ef) || isNaN(energy) || isNaN(prod) || ef < 0 || energy < 0 || prod < 0) {
+    alert('모든 입력값을 0 이상의 숫자로 입력해주세요.');
+    return;
+  }
+
+  // 스코어 계산 (다변량)
+  let score = 100;
+  let checks = [];
+
+  // 1) 배출계수 범위 체크
+  if(ef < s.min || ef > s.max) {
+    score -= 50;
+    checks.push({pass:false, msg:`배출계수 ${ef}이 ${s.name} 물리적 범위(${s.min}~${s.max})를 벗어남`});
+  } else {
+    const zEf = Math.abs(ef - s.mean) / s.std;
+    const efPenalty = Math.min(30, zEf * 10);
+    score -= efPenalty;
+    if(zEf < 1) checks.push({pass:true, msg:`배출계수 ${ef} — ${s.name} 평균(${s.mean}) 부근. 정상 범위`});
+    else if(zEf < 2) checks.push({pass:true, msg:`배출계수 ${ef} — ${s.name} 평균에서 다소 벗어남 (${zEf.toFixed(1)}σ). 주의`});
+    else checks.push({pass:false, msg:`배출계수 ${ef} — ${s.name} 평균에서 크게 벗어남 (${zEf.toFixed(1)}σ). 의심`});
+  }
+
+  // 2) 에너지 범위 체크
+  if(energy < s.energy_min || energy > s.energy_max) {
+    score -= 20;
+    checks.push({pass:false, msg:`에너지 ${energy} GJ/t이 ${s.name} 범위(${s.energy_min}~${s.energy_max})를 벗어남`});
+  } else {
+    const zEn = Math.abs(energy - s.energy_mean) / s.energy_std;
+    const enPenalty = Math.min(15, zEn * 5);
+    score -= enPenalty;
+    checks.push({pass:zEn<2, msg:`에너지 ${energy} GJ/t — ${s.name} 평균(${s.energy_mean}) 대비 ${zEn.toFixed(1)}σ`});
+  }
+
+  // 3) 에너지-배출 정합성 (에너지 대비 배출이 너무 낮으면 의심)
+  const expectedEfFromEnergy = energy * (s.mean / s.energy_mean);
+  const ratio = expectedEfFromEnergy > 0 ? ef / expectedEfFromEnergy : 0;
+  if(ratio < 0.5 || ratio > 1.8) {
+    score -= 20;
+    checks.push({pass:false, msg:`에너지(${energy}GJ) 대비 배출계수(${ef})가 비정상적 비율(${ratio.toFixed(2)}). 데이터 불일치 의심`});
+  } else {
+    checks.push({pass:true, msg:`에너지-배출 정합성 비율 ${ratio.toFixed(2)} — 정상 범위`});
+  }
+
+  // 4) 생산량 합리성
+  if(prod < 100) {
+    score -= 5;
+    checks.push({pass:false, msg:`생산량 ${fmt(prod)}톤 — EU 수출 규모로 매우 적음. 확인 필요`});
+  } else {
+    checks.push({pass:true, msg:`생산량 ${fmt(prod)}톤 — 규모 적정`});
+  }
+
+  score = Math.max(0, Math.min(100, Math.round(score)));
+
+  // 저장
+  lastScoreData = { sector: sectorKey, sectorName: s.name, ef, energy, prod, score };
+
+  // 스텝 인디케이터 업데이트
+  updateStepIndicators(1);
+
+  // 결과 표시
+  const resultDiv = document.getElementById('q-result');
+  resultDiv.style.display = 'block';
+
+  const scoreNum = document.getElementById('q-score-num');
+  const scoreLabel = document.getElementById('q-score-label');
+  scoreNum.textContent = score;
+
+  if(score >= 80) { scoreNum.style.color = 'var(--hana)'; scoreLabel.textContent = '✓ 신뢰 가능'; scoreLabel.style.color = 'var(--hana)'; }
+  else if(score >= 60) { scoreNum.style.color = 'var(--orange)'; scoreLabel.textContent = '△ 추가 확인 권장'; scoreLabel.style.color = 'var(--orange)'; }
+  else { scoreNum.style.color = 'var(--red)'; scoreLabel.textContent = '✗ 데이터 재확인 필요'; scoreLabel.style.color = 'var(--red)'; }
+
+  // 체크 항목
+  const detailsDiv = document.getElementById('q-details');
+  detailsDiv.innerHTML = checks.map(c =>
+    `<div>${c.pass ? '<span style="color:var(--hana)">✓</span>' : '<span style="color:var(--red)">✗</span>'} ${c.msg}</div>`
+  ).join('');
+
+  // EU 기본값 비교 (2028년 기준 30% 마크업)
+  const euDef = s.eu_default * s.markup_2028;
+  const saving = (euDef - ef) * 75 * 1450 / 100000000; // 1만톤 기준 억원
+  if(ef < euDef) {
+    detailsDiv.innerHTML += `<div style="margin-top:8px;padding:8px;background:var(--hana-light);border-radius:6px"><b>💰 실측 데이터 확보 시 절감:</b> EU 기본값(${euDef.toFixed(2)}) vs 실측(${ef}) → 1만톤 수출 시 <b>연 ~${saving.toFixed(1)}억 원 절감</b></div>`;
+  }
+
+  // 분포 시각화
+  drawDistribution(sectorKey, ef);
+
+  // 데이터 연동: Demo3에 자동 반영
+  syncToDemo3(lastScoreData);
+}
+
+function drawDistribution(sectorKey, userEf) {
+  const canvas = document.getElementById('q-canvas');
+  const s = SECTORS[sectorKey];
+  const logicalW = 800, logicalH = 160;
+  const ctx = setupHiDPICanvas(canvas, logicalW, logicalH);
+  const W = logicalW, H = logicalH;
+  const pad = {l:50, r:30, t:20, b:35};
+  const cW = W - pad.l - pad.r, cH = H - pad.t - pad.b;
+
+  ctx.clearRect(0,0,W,H);
+
+  // X축 범위
+  const xMin = Math.max(0, s.mean - 4*s.std);
+  const xMax = s.mean + 4*s.std;
+  const toX = v => pad.l + (v - xMin)/(xMax - xMin)*cW;
+
+  // Y축: gaussian max
+  const yMax = gaussian(s.mean, s.mean, s.std) * 1.2;
+  const toY = v => pad.t + cH - (v/yMax)*cH;
+
+  // 정상 범위 (±2σ) 배경
+  ctx.fillStyle = 'rgba(0,140,115,0.08)';
+  ctx.fillRect(toX(s.mean-2*s.std), pad.t, toX(s.mean+2*s.std)-toX(s.mean-2*s.std), cH);
+
+  // 분포 곡선
+  ctx.beginPath();
+  ctx.strokeStyle = '#008C73';
+  ctx.lineWidth = 2;
+  for(let i=0; i<=200; i++) {
+    const x = xMin + (xMax-xMin)*i/200;
+    const y = gaussian(x, s.mean, s.std);
+    if(i===0) ctx.moveTo(toX(x), toY(y));
+    else ctx.lineTo(toX(x), toY(y));
+  }
+  ctx.stroke();
+
+  // 채우기
+  ctx.beginPath();
+  ctx.moveTo(toX(xMin), toY(0));
+  for(let i=0; i<=200; i++) {
+    const x = xMin + (xMax-xMin)*i/200;
+    const y = gaussian(x, s.mean, s.std);
+    ctx.lineTo(toX(x), toY(y));
+  }
+  ctx.lineTo(toX(xMax), toY(0));
+  ctx.fillStyle = 'rgba(0,140,115,0.12)';
+  ctx.fill();
+
+  // EU 기본값 라인 (2028년 기준 30% 마크업)
+  const euDef = s.eu_default * s.markup_2028;
+  if(euDef <= xMax) {
+    ctx.beginPath();
+    ctx.strokeStyle = '#C62828';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6,4]);
+    ctx.moveTo(toX(euDef), pad.t);
+    ctx.lineTo(toX(euDef), pad.t+cH);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#C62828';
+    ctx.font = '10px "Noto Sans KR"';
+    ctx.fillText('EU 기본값 '+euDef.toFixed(2), toX(euDef)+4, pad.t+12);
+  }
+
+  // 사용자 값 마커
+  if(userEf >= xMin && userEf <= xMax) {
+    ctx.beginPath();
+    ctx.fillStyle = lastScoreData && lastScoreData.score >= 60 ? '#008C73' : '#C62828';
+    ctx.arc(toX(userEf), toY(gaussian(userEf, s.mean, s.std)), 6, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = '#1B1B1B';
+    ctx.font = 'bold 11px "Noto Sans KR"';
+    ctx.fillText('입력값 '+userEf, toX(userEf)+10, toY(gaussian(userEf, s.mean, s.std))-8);
+  } else {
+    // 범위 밖이면 화살표
+    ctx.fillStyle = '#C62828';
+    ctx.font = 'bold 11px "Noto Sans KR"';
+    if(userEf < xMin) ctx.fillText('← 입력값 '+userEf+' (범위 밖)', pad.l, pad.t+12);
+    else ctx.fillText('입력값 '+userEf+' (범위 밖) →', W-pad.r-120, pad.t+12);
+  }
+
+  // 평균 라벨
+  ctx.fillStyle = '#5A6370';
+  ctx.font = '10px "Noto Sans KR"';
+  ctx.fillText('평균 '+s.mean, toX(s.mean)+4, toY(gaussian(s.mean, s.mean, s.std))-8);
+
+  // X축
+  ctx.beginPath();
+  ctx.strokeStyle = '#DDE1E6';
+  ctx.lineWidth = 1;
+  ctx.moveTo(pad.l, pad.t+cH);
+  ctx.lineTo(pad.l+cW, pad.t+cH);
+  ctx.stroke();
+
+  // X축 라벨
+  ctx.fillStyle = '#8C95A0';
+  ctx.font = '10px "JetBrains Mono",monospace';
+  const step = (xMax-xMin)/6;
+  for(let i=0; i<=6; i++) {
+    const v = xMin + step*i;
+    ctx.fillText(v.toFixed(2), toX(v)-15, pad.t+cH+14);
+  }
+  ctx.fillStyle = '#5A6370';
+  ctx.font = '10px "Noto Sans KR"';
+  ctx.fillText('tCO₂/톤', pad.l + cW/2 - 20, pad.t+cH+30);
+
+  // 범위 라벨
+  document.getElementById('q-dist-label').textContent =
+    `${s.name} 배출계수 분포 (K-ETS 기반, 평균 ${s.mean}, σ=${s.std}) | 초록 영역 = ±2σ 정상 범위 | 빨간 점선 = EU 기본값(마크업 포함)`;
+}
+
+// ===== DEMO 2: 블록체인 =====
+async function runBlockchain() {
+  if(!lastScoreData) {
+    document.getElementById('bc-gate').textContent = '⚠ 먼저 위의 품질 스코어링을 실행하세요';
+    return;
+  }
+  if(lastScoreData.score < 60) {
+    document.getElementById('bc-gate').textContent = '⚠ 품질 스코어 60점 미만 — 블록체인 기록 거부. 데이터를 수정하세요.';
+    document.getElementById('bc-gate').style.color = 'var(--red)';
+    return;
+  }
+  document.getElementById('bc-gate').textContent = '';
+
+  const data = lastScoreData;
+  const timestamp = new Date().toISOString();
+  const payload = JSON.stringify({
+    company_id: 'HANA-' + Math.random().toString(36).substr(2,6).toUpperCase(),
+    cn_code: data.sector === 'steel_bf' ? '7207' : data.sector === 'steel_eaf' ? '7207' : data.sector === 'aluminium' ? '7601' : data.sector === 'cement' ? '2523' : data.sector === 'fertiliser' ? '3102' : '2804',
+    sector: data.sectorName,
+    emission_factor: data.ef,
+    energy_intensity: data.energy,
+    production_volume: data.prod,
+    quality_score: data.score,
+    timestamp: timestamp,
+    verifier: 'HANA_CARBONCAST_v2'
+  });
+
+  const hash = await sha256(payload);
+  lastHash = { hash, payload: JSON.parse(payload), ef: data.ef };
+
+  // 스텝 인디케이터 업데이트
+  updateStepIndicators(2);
+
+  // 결과 표시
+  document.getElementById('bc-result').style.display = 'block';
+  document.getElementById('bc-hash-short').textContent = '0x' + hash.substr(0,8) + '...' + hash.substr(-4);
+  document.getElementById('bc-tamper').value = data.ef;
+
+  const record = document.getElementById('bc-record');
+  const p = lastHash.payload;
+  record.innerHTML = `
+    <div><span style="color:var(--sub)">txHash:</span> <span style="color:var(--hana)">0x${hash}</span></div>
+    <div><span style="color:var(--sub)">block:</span> #1042</div>
+    <div><span style="color:var(--sub)">timestamp:</span> ${timestamp}</div>
+    <div><span style="color:var(--sub)">company_id:</span> ${p.company_id}</div>
+    <div><span style="color:var(--sub)">cn_code:</span> ${p.cn_code} (${p.sector})</div>
+    <div><span style="color:var(--sub)">emission_factor:</span> ${p.emission_factor} tCO₂/t</div>
+    <div><span style="color:var(--sub)">quality_score:</span> ${p.quality_score}/100</div>
+    <div><span style="color:var(--sub)">verifier:</span> ${p.verifier}</div>
+  `;
+}
+
+async function checkTamper() {
+  if(!lastHash) return;
+  const tampered = parseFloat(document.getElementById('bc-tamper').value);
+  const original = lastHash.payload;
+  const newPayload = JSON.stringify({...original, emission_factor: tampered});
+  const newHash = await sha256(newPayload);
+  const resultSpan = document.getElementById('bc-tamper-result');
+
+  if(newHash === lastHash.hash) {
+    resultSpan.textContent = '✓ 해시 일치 — 변조 없음';
+    resultSpan.style.color = 'var(--hana)';
+  } else {
+    resultSpan.textContent = '✗ 해시 불일치! 변조 감지됨 (0x' + newHash.substr(0,8) + '... ≠ 0x' + lastHash.hash.substr(0,8) + '...)';
+    resultSpan.style.color = 'var(--red)';
+  }
+}
+
+// ===== DEMO 3: CBAM 비용 시뮬레이션 =====
+function updateSim() {
+  const sectorKey = document.getElementById('sim-sector').value;
+  const vol = parseInt(document.getElementById('sim-vol').value);
+  const fx = parseInt(document.getElementById('sim-fx').value);
+  const dataType = document.getElementById('sim-data-type').value;
+  const s = SECTORS[sectorKey];
+
+  // 업종 변경 시 EF 슬라이더를 해당 업종 평균으로 리셋
+  const efSlider = document.getElementById('sim-ef');
+  if(sectorKey !== (updateSim._lastSector||'steel_bf')) {
+    efSlider.value = s.mean;
+    efSlider.min = Math.max(0.1, s.mean - 3*s.std).toFixed(2);
+    efSlider.max = (s.mean + 3*s.std).toFixed(2);
+    updateSim._lastSector = sectorKey;
+  }
+  const ef2 = parseFloat(efSlider.value);
+
+  document.getElementById('sim-vol-val').textContent = fmt(vol);
+  document.getElementById('sim-fx-val').textContent = fmt(fx);
+  document.getElementById('sim-ef-val').textContent = ef2.toFixed(2);
+  document.getElementById('sim-bm-val').textContent = s.benchmark.toFixed(3);
+
+  // 기본값 적용 시: 연도별 마크업 반영
+  const getMarkup = (y) => y <= 2026 ? s.markup_2026 : y <= 2027 ? s.markup_2027 : s.markup_2028;
+  const useEfBase = dataType === 'default' ? s.eu_default : ef2;
+  const benchmark = s.benchmark;
+  const years = [2026,2027,2028,2029,2030,2031,2032,2033,2034];
+  const scenarios = ['nz','b2','delayed','current'];
+  const colors = ['#C62828','#E65100','#1565C0','#5A6370'];
+
+  // 비용 계산 — 정확한 공식: Vol × [EF×markup − BM × (1−폐지율)] × EUA × FX
+  const costs = {};
+  scenarios.forEach(sc => {
+    costs[sc] = years.map(y => {
+      const useEf = dataType === 'default' ? useEfBase * getMarkup(y) : useEfBase;
+      const phaseInRate = 1 - PHASE_IN[y]; // 무상할당 잔여율
+      const liable = useEf - benchmark * phaseInRate;
+      return vol * Math.max(0, liable) * ETS_PRICES[sc][y] * fx / 100000000; // 억원
+    });
+  });
+
+  // 캔버스 차트
+  const canvas = document.getElementById('sim-canvas');
+  const logicalW = 800, logicalH = 300;
+  const ctx = setupHiDPICanvas(canvas, logicalW, logicalH);
+  const W = logicalW, H = logicalH;
+  const pad = {l:60, r:20, t:20, b:35};
+  const cW = W-pad.l-pad.r, cH = H-pad.t-pad.b;
+
+  ctx.clearRect(0,0,W,H);
+
+  // Y축 최대값
+  let yMax = 0;
+  scenarios.forEach(sc => costs[sc].forEach(v => { if(v>yMax) yMax=v; }));
+  yMax = yMax * 1.15 || 1;
+
+  const toX = i => pad.l + i/(years.length-1)*cW;
+  const toY = v => pad.t + cH - (v/yMax)*cH;
+
+  // 그리드
+  ctx.strokeStyle = '#F0F2F5';
+  ctx.lineWidth = 1;
+  for(let i=0; i<5; i++) {
+    const y = pad.t + cH*i/4;
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+cW,y); ctx.stroke();
+    ctx.fillStyle = '#8C95A0';
+    ctx.font = '10px "JetBrains Mono",monospace';
+    const val = yMax*(1-i/4);
+    ctx.fillText(fmtBil(val), 4, y+4);
+  }
+
+  // 시나리오 라인
+  scenarios.forEach((sc, si) => {
+    ctx.beginPath();
+    ctx.strokeStyle = colors[si];
+    ctx.lineWidth = si===0 ? 3 : 2;
+    costs[sc].forEach((v, i) => {
+      if(i===0) ctx.moveTo(toX(i), toY(v));
+      else ctx.lineTo(toX(i), toY(v));
+    });
+    ctx.stroke();
+
+    // 점
+    costs[sc].forEach((v, i) => {
+      ctx.beginPath();
+      ctx.fillStyle = colors[si];
+      ctx.arc(toX(i), toY(v), 3, 0, Math.PI*2);
+      ctx.fill();
+    });
+  });
+
+  // X축 라벨
+  ctx.fillStyle = '#5A6370';
+  ctx.font = '11px "JetBrains Mono",monospace';
+  years.forEach((y, i) => {
+    ctx.fillText(y, toX(i)-14, pad.t+cH+16);
+  });
+
+  // Y축 단위
+  ctx.fillStyle = '#8C95A0';
+  ctx.font = '10px "Noto Sans KR"';
+  ctx.fillText('(억 원)', 4, pad.t-4);
+
+  // 테이블
+  const tbody = document.getElementById('sim-tbody');
+  tbody.innerHTML = years.map((y, i) =>
+    `<tr>
+      <td style="font-weight:600">${y}</td>
+      <td class="mono">${(PHASE_IN[y]*100).toFixed(1)}%</td>
+      <td class="mono" style="color:#C62828">${costs.nz[i].toFixed(1)}억</td>
+      <td class="mono" style="color:#E65100">${costs.b2[i].toFixed(1)}억</td>
+      <td class="mono" style="color:#1565C0">${costs.delayed[i].toFixed(1)}억</td>
+      <td class="mono" style="color:#5A6370">${costs.current[i].toFixed(1)}억</td>
+    </tr>`
+  ).join('');
+
+  // 기본값 vs 실측 비교
+  const compareDiv = document.getElementById('sim-compare');
+  compareDiv.style.display = 'block';
+  const defEf = s.eu_default * s.markup_2028; // 2034년이니 30% 마크업
+  const actEf = ef2;
+  // 2034년 폐지율 100% → 벤치마크 공제 0% → EF 전체에 비용
+  const defCost2034 = vol * Math.max(0, defEf) * ETS_PRICES.b2[2034] * fx / 100000000;
+  const actCost2034 = vol * Math.max(0, actEf) * ETS_PRICES.b2[2034] * fx / 100000000;
+  const saveCost = defCost2034 - actCost2034;
+
+  document.getElementById('cmp-default').textContent = defCost2034.toFixed(1) + '억';
+  document.getElementById('cmp-actual').textContent = actCost2034.toFixed(1) + '억';
+  document.getElementById('cmp-save').textContent = (saveCost > 0 ? '↓' : '↑') + Math.abs(saveCost).toFixed(1) + '억';
+
+  // 절감 안내
+  if(saveCost > 0) {
+    document.getElementById('sim-saving').textContent = `실측 제출 시 2034년 기준 연 ${saveCost.toFixed(1)}억 원 절감`;
+  } else {
+    document.getElementById('sim-saving').textContent = '';
+  }
+}
+
+// 초기 실행
+updateSim();
+</script>
+</body>
+</html>

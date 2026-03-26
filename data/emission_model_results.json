@@ -1,0 +1,25 @@
+{
+  "stage1_r2": 0.776,
+  "stage1_mape": 20.1,
+  "stage2_r2": 0.778,
+  "stage2_mape": 8.0,
+  "feature_importance": {
+    "energy_per_ton": 950,
+    "elec_ratio": 905,
+    "revenue_per_employee": 753,
+    "revenue_billion": 593,
+    "electricity_mwh": 592,
+    "employees": 548,
+    "production_tons": 512,
+    "sector_enc": 508,
+    "fuel_tj": 466,
+    "energy_tj": 414,
+    "primary_fuel_enc": 210,
+    "log_production": 0,
+    "log_energy": 0
+  },
+  "n_companies": 628,
+  "n_cbam_direct": 78,
+  "n_cbam_downstream": 230,
+  "n_eu_exporters": 141
+}

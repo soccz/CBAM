@@ -1,0 +1,20 @@
+{
+  "test_days": 60,
+  "mae_eur": 3.15,
+  "mape_pct": 4.4,
+  "direction_acc": 66.1,
+  "coverage_80": 43.3,
+  "current_price": 59.97,
+  "feature_importance": {
+    "ets_std20": 692,
+    "gas_lag1": 554,
+    "eurkrw_ma20": 463,
+    "ets_std5": 445,
+    "ets_std10": 420,
+    "gas_ma20": 359,
+    "ets_std60": 355,
+    "ets_ret1": 313,
+    "brent_ma20": 306,
+    "brent_lag1": 303
+  }
+}
